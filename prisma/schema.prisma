@@ -15,6 +15,7 @@ model User {
   createdAt DateTime @default(now())
 
   jobs Job[]
+  resume Resume[]
 }
 
 model Job {
@@ -22,10 +23,16 @@ model Job {
   title String
   company String
   location String
-  status JobStatus 
+  status JobStatus @default(APPLIED)
+  salary String?
+  description String
+  link String?
+  notes String?
 
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  resumeEvaluations ResumeEvaluations[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -40,4 +47,59 @@ enum JobStatus {
   OFFERED
   REJECTED
   WITHDRAWN
+}
+
+model Resume { 
+  id String @id @default(cuid())
+  title String
+  fileName String
+  mimeType String
+  fileUrl String
+  createdAt DateTime @default(now())
+  
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  parsedData ResumeParsedData?
+  evaluations ResumeEvaluations[]
+
+  @@index([userId])
+}
+
+model ResumeParsedData {
+  id String @id @default(cuid())
+
+  resumeId String @unique
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  rawText String
+  keywords String[]
+  skills String[]
+
+  experience Json
+  education Json
+
+  createdAt DateTime @default(now())
+}
+
+model ResumeEvaluations {
+  id String @id @default(cuid())
+
+  resumeId String
+  jobId String
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  matchScore Float
+  summary String
+  strengths String[]
+  gaps String[]
+
+  modelUsed String
+  promptHash String
+
+  createdAt DateTime @default(now())
+
+  @@unique([resumeId, jobId])
 }
