@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, company, location, status } = body;
+    const { title, company, location, status, description, notes } = body;
     if (!title || !company || !location || !status) {
         return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
@@ -19,6 +19,8 @@ export async function POST(request: Request) {
             company,
             location,
             status,
+            description,
+            notes,
             userId: user.id
         },
     });

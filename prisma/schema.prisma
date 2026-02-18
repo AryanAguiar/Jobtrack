@@ -73,7 +73,6 @@ model ResumeParsedData {
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
   rawText String
-  keywords String[]
   skills String[]
 
   experience Json
@@ -102,4 +101,14 @@ model ResumeEvaluations {
   createdAt DateTime @default(now())
 
   @@unique([resumeId, jobId])
+}
+
+model GroqFailures { 
+  id String @id @default(cuid())
+
+  reason String 
+  promptHash String
+  modelUsed String
+
+  createdAt DateTime @default(now())
 }

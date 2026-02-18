@@ -61,7 +61,6 @@ export async function POST(request: Request) {
             parsedData: {
                 create: {
                     rawText: parsed.text,
-                    keywords: parsed.keywords,
                     skills: parsed.skills,
                     experience: parsed.experience,
                     education: parsed.education,
