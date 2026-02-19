@@ -31,7 +31,7 @@ The frontend UI and additional features are still in progress.
 - AI Model: llama-3.1-8b-instant (via Groq API)
 - Language: TypeScript 
 
-## To Run This Project, You Will Need To Have The Following Installed:
+## To Run This Project, You Will Need To Have The Following:
 - Node.js (v24.13.0)
 - Prisma (v6.19.0)
 - Groq API key
@@ -48,7 +48,6 @@ Server Runs On:
 http://localhost:3000
 
 ## Future Improvements:
-- Resume content hashing for smarter caching
 - Weighted deterministic scoring (skills vs experience)
 - Streaming LLM responses
 - Rate limiting & abuse protection

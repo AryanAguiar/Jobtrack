@@ -1,36 +1,17 @@
-import bcrypt from "bcrypt";
-import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { generateToken } from "@/utils/jwt";
+import { ServiceError } from "@/utils/helpers";
+import { login } from "@/services/auth.service";
 
 export async function POST(request: Request) {
     const { email, password } = await request.json();
-    if (!email || !password) {
-        return NextResponse.json({ message: "Email and password required" }, { status: 400 });
+    try {
+        const { user, token } = await login(email, password);
+        return NextResponse.json({ user, token }, { status: 200 });
+    } catch (error) {
+        if (error instanceof ServiceError) {
+            return NextResponse.json({ message: error.message }, { status: error.status });
+        }
+        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }
-
-    const user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() }
-    });
-
-    if (!user) {
-        return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-        return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
-    }
-
-    const token = generateToken({ id: user.id });
-
-    return NextResponse.json({
-        user: {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        },
-        token
-    }, { status: 200 });
 
 }
