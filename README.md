@@ -44,7 +44,7 @@ npm run dev
 DATABASE_URL=your_database_url
 GROQ_API_KEY=your_api_key
 
-## Server Runs At:
+Server Runs On:
 http://localhost:3000
 
 ## Future Improvements:
