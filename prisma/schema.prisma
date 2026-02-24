@@ -92,6 +92,7 @@ model ResumeEvaluations {
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   matchScore Float
+  breakdown Json?
   summary String
   strengths String[]
   gaps String[]

@@ -3,6 +3,7 @@ import { groq } from "./groq";
 import crypto from "crypto";
 import { groqRetry } from "@/utils/groqRetry";
 import { prisma } from "./db";
+import { calculateScore } from "./scorer";
 
 const MODEL = "llama-3.1-8b-instant";
 export async function evaluateResume(resumeText: string, jobText: string): Promise<ResumeEvaluation> {
@@ -12,11 +13,16 @@ export async function evaluateResume(resumeText: string, jobText: string): Promi
 
                 Return ONLY valid JSON:
 
-                {
-                "matchScore": integer (0-100),
-                "summary": string,
-                "strengths": string[],
-                "gaps": string[]
+                interface ResumeEvaluationResponse {
+                  "requiredSkills": string[],
+                  "matchedSkills": string[],
+                  "requiredYears": number,
+                  "candidateYears": number,
+                  "requiredEducation": string,
+                  "candidateEducation": string,
+                  "summary": string,
+                  "strengths": string[],
+                  "gaps": string[]
                 }
 
                 RESUME:
@@ -58,11 +64,20 @@ export async function evaluateResume(resumeText: string, jobText: string): Promi
             console.error("Failed to parse JSON response:", raw);
             throw new Error("Invalid JSON response from AI model");
         }
-        let score = Number(parsed?.matchScore ?? 0);
-        score = Math.max(0, Math.min(100, score));
+        const scoringInput = {
+            requiredSkills: parsed?.requiredSkills ?? [],
+            matchedSkills: parsed?.matchedSkills ?? [],
+            requiredYears: Number(parsed?.requiredYears ?? 0),
+            candidateYears: Number(parsed?.candidateYears ?? 0),
+            requiredEducation: parsed?.requiredEducation ?? "",
+            candidateEducation: parsed?.candidateEducation ?? "",
+        }
+
+        const { finalScore, breakdown } = calculateScore(scoringInput)
 
         return {
-            matchScore: score,
+            matchScore: finalScore,
+            breakdown: breakdown,
             summary: parsed?.summary ?? "",
             strengths: Array.isArray(parsed?.strengths) ? parsed.strengths : [],
             gaps: Array.isArray(parsed?.gaps) ? parsed.gaps : [],

@@ -48,8 +48,7 @@ Server Runs On:
 http://localhost:3000
 
 ## Future Improvements:
-- Weighted deterministic scoring (skills vs experience)
+- Weighted deterministic scoring (skills vs experience) (wip)
 - Streaming LLM responses
 - Rate limiting & abuse protection
-- Multi-model comparison engine
 - Evaluation analytics dashboard
