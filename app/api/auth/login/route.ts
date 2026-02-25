@@ -4,8 +4,9 @@ import { login } from "@/services/auth.service";
 
 export async function POST(request: Request) {
     const { email, password } = await request.json();
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
     try {
-        const { user, token } = await login(email, password);
+        const { user, token } = await login(email, password, ip);
         return NextResponse.json({ user, token }, { status: 200 });
     } catch (error) {
         if (error instanceof ServiceError) {

@@ -4,16 +4,35 @@ import crypto from "crypto";
 import { groqRetry } from "@/utils/groqRetry";
 import { prisma } from "./db";
 import { calculateScore } from "./scorer";
+import { apiLimiter } from "./rateLimiter";
+import { ServiceError } from "@/utils/helpers";
 
 const MODEL = "llama-3.1-8b-instant";
-export async function evaluateResume(resumeText: string, jobText: string): Promise<ResumeEvaluation> {
+export async function evaluateResume(resumeText: string, jobText: string, userId: string): Promise<ResumeEvaluation> {
 
     const prompt = `
-                Evaluate this resume against the job description.
+                You are evaluating a candidate's resume against a job description.
 
-                Return ONLY valid JSON:
+                INSTRUCTIONS:
+                1. Extract ALL required skills from the job description as "requiredSkills".
+                2. Extract ALL of the candidate's skills from the resume as "matchedSkills" — include EVERY skill the candidate has, even if it is not required by the job.
+                3. NORMALIZE all skill names to lowercase (e.g., "Node.js" → "node.js", "Express.js" → "express").
+                4. Treat synonyms and aliases as the SAME skill:
+                   - "express" = "express.js" = "expressjs"
+                   - "node" = "node.js" = "nodejs"
+                   - "postgres" = "postgresql" = "pg"
+                   - "mongo" = "mongodb"
+                   - "js" = "javascript"
+                   - "ts" = "typescript"
+                5. For "requiredYears", extract the MINIMUM years of experience required. If the job says "3+ years", use 3. If no years mentioned, use 0.
+                6. For "candidateYears", calculate total years from the candidate's work experience entries. If not clear, estimate from the resume context.
+                7. For education fields, use ONLY these standardized values: "high school", "diploma", "bachelor degree", "master degree", "doctorate degree".
+                8. The "summary" should be 2-3 sentences explaining the overall fit.
+                9. "strengths" should list specific matching qualifications the candidate has.
+                10. "gaps" should list ONLY specific missing requirements — do NOT list a gap if the candidate has the skill or an equivalent/synonym.
 
-                interface ResumeEvaluationResponse {
+                Return ONLY valid JSON matching this exact structure:
+                {
                   "requiredSkills": string[],
                   "matchedSkills": string[],
                   "requiredYears": number,
@@ -33,6 +52,13 @@ export async function evaluateResume(resumeText: string, jobText: string): Promi
             `
 
     const promptHash = crypto.createHash("sha256").update(prompt).digest("hex");
+
+    try {
+        await apiLimiter.consume(userId);
+    } catch (err: any) {
+        throw new ServiceError("Too many requests. Please try again in 60 seconds.", 429);
+    }
+
     try {
         const completion = await groqRetry(() => groq.chat.completions.create({
             model: MODEL,

@@ -77,17 +77,22 @@ export async function createOrUpdateEvaluation(userId: string, resumeId: string,
     }
 
     const formattedResume = `
-          EXPERIENCE:
-          ${resume.parsedData.experience || "Not provided"}
-  
-          EDUCATION:
-          ${resume.parsedData.education || "Not provided"}
-  
-          SKILLS:
-          ${Array.isArray(resume.parsedData.skills) ? resume.parsedData.skills.join(", ") : resume.parsedData.skills || "Not provided"}
-          `;
+       EXPERIENCE:
+       ${typeof resume.parsedData.experience === 'object'
+            ? JSON.stringify(resume.parsedData.experience, null, 2)
+            : resume.parsedData.experience || "Not provided"}
+ 
+       EDUCATION:
+       ${typeof resume.parsedData.education === 'object'
+            ? JSON.stringify(resume.parsedData.education, null, 2)
+            : resume.parsedData.education || "Not provided"}
+ 
+       SKILLS:
+       ${Array.isArray(resume.parsedData.skills) ? resume.parsedData.skills.join(", ") : resume.parsedData.skills || "Not provided"}
+       `;
 
-    const evaluation = await evaluateResume(formattedResume, job.description);
+
+    const evaluation = await evaluateResume(formattedResume, job.description, userId);
 
     const savedEvaluation = await prisma.resumeEvaluations.upsert({
         where: {
