@@ -17,33 +17,27 @@ export async function login(email: string, password: string, ip: string) {
     const emailKey = `${normalizeEmail(email)}`;
     const ipKey = `${ip}`;
 
+    try {
+        await loginLimiter.consume(emailKey);
+        await loginLimiter.consume(ipKey);
+    } catch {
+        throw new ServiceError("Too many attempts. Please try again after 10 minutes.", 429);
+    }
+
     const user = await prisma.user.findUnique({
         where: { email: normalizeEmail(email) }
     });
 
     if (!user) {
-        try {
-            await loginLimiter.consume(emailKey);
-            await loginLimiter.consume(ipKey);
-        } catch (err) {
-            throw new ServiceError("Too many failed login attempts. Please try again shortly.", 429);
-        }
         throw new ServiceError("Invalid credentials", 401);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        try {
-            await loginLimiter.consume(emailKey);
-            await loginLimiter.consume(ipKey);
-        } catch (err) {
-            throw new ServiceError("Too many failed login attempts. Please try again shortly.", 429);
-        }
         throw new ServiceError("Invalid credentials", 401);
     }
 
     await loginLimiter.delete(emailKey);
-    await loginLimiter.delete(ipKey);
 
     const token = generateToken({ id: user.id });
 
@@ -74,7 +68,7 @@ export async function register(email: string, password: string, name: string, ip
     try {
         await registerLimiter.consume(ip);
     } catch (err) {
-        throw new ServiceError("Too many registration attempts. Please try again shortly.", 429);
+        throw new ServiceError("Too many registration attempts. Please try again after 10 minutes.", 429);
     }
 
     const existingUser = await prisma.user.findUnique({

@@ -3,6 +3,7 @@ import fs from "fs";
 import { prisma } from "@/lib/db";
 import { parsePdf } from "@/lib/parser";
 import { hashText, normalizeText, ServiceError } from "@/utils/helpers";
+import { resumeUploadLimiter } from "@/lib/rateLimiter";
 
 const UPLOADS_DIR = path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -65,6 +66,12 @@ export async function uploadResume(file: File, title: string, userId: string) {
 
     if (file.size > MAX_FILE_SIZE) {
         throw new ServiceError("File size exceeds 10MB limit", 400);
+    }
+
+    try {
+        await resumeUploadLimiter.consume(userId);
+    } catch (err) {
+        throw new ServiceError("Too many resume uploads. Please try again after 24 hours.", 429);
     }
 
     if (!fs.existsSync(UPLOADS_DIR)) {
