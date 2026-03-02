@@ -32,8 +32,11 @@ export async function GET(request: Request) {
 
         const page = Number(searchParams.get("page")) || 1;
         const limit = Number(searchParams.get("limit")) || 10;
-        const result = await getAllJobs(user.id, page, limit);
-        return NextResponse.json({ message: "Jobs fetched successfully", result }, { status: 200 });
+        const search = searchParams.get("search") || undefined;
+        const sortKey = searchParams.get("sortKey") || "createdAt";
+        const sortOrder = (searchParams.get("sortOrder") as "asc" | "desc") || "desc";
+        const result = await getAllJobs(user.id, page, limit, search, sortKey, sortOrder);
+        return NextResponse.json(result, { status: 200 });
     }
     catch (error) {
         if (error instanceof ServiceError) {

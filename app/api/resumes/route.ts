@@ -15,7 +15,7 @@ export async function GET(request: Request) {
         const page = Number(searchParams.get("page")) || 1;
         const limit = Number(searchParams.get("limit")) || 10;
         const resumes = await getUserResumes(user.id, page, limit);
-        return NextResponse.json({ message: "Resumes fetched successfully", resumes }, { status: 200 });
+        return NextResponse.json(resumes, { status: 200 });
     } catch (error) {
         if (error instanceof ServiceError) {
             return NextResponse.json({ message: error.message }, { status: error.status });

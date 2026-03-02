@@ -13,17 +13,48 @@ export interface PaginatedJobResult {
 }
 
 // Get all jobs
-export async function getAllJobs(userId: string, page: number = 1, limit: number = 10): Promise<PaginatedJobResult> {
+export async function getAllJobs(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    sortKey: string = "createdAt",
+    sortOrder: "asc" | "desc" = "desc"
+): Promise<PaginatedJobResult> {
     const skip = (page - 1) * limit;
+
+    const where: any = {
+        userId
+    }
+
+    if (search) {
+        where.OR = [
+            { title: { contains: search, mode: "insensitive" } },
+            { company: { contains: search, mode: "insensitive" } },
+            { location: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+            { notes: { contains: search, mode: "insensitive" } }
+        ];
+    }
+
+    const orderBy: any = {};
+    if (sortKey === "salary") {
+        orderBy.salary = sortOrder;
+    } else if (sortKey === "status") {
+        orderBy.status = sortOrder;
+    } else {
+        orderBy.createdAt = sortOrder;
+    }
+
     const [jobs, total] = await Promise.all([
         prisma.job.findMany({
-            where: { userId },
+            where,
             skip,
             take: limit,
-            orderBy: { createdAt: "desc" }
+            orderBy
         }),
         prisma.job.count({
-            where: { userId }
+            where
         })
     ]);
     return {

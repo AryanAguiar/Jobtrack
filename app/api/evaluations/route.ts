@@ -31,8 +31,11 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const page = Math.max(1, Number(searchParams.get("page")) || 1);
         const limit = Math.max(1, Number(searchParams.get("limit")) || 10);
+        const search = searchParams.get("search") || undefined;
+        const sortKey = searchParams.get("sortKey") || "createdAt";
+        const sortOrder = (searchParams.get("sortOrder") as "asc" | "desc") || "desc";
 
-        const evaluations = await getEvaluations(user.id, page, limit);
+        const evaluations = await getEvaluations(user.id, page, limit, search, sortKey, sortOrder);
         return NextResponse.json(evaluations);
     } catch (error) {
         if (error instanceof ServiceError) {

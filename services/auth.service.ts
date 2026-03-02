@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import { loginLimiter, registerLimiter } from "@/lib/rateLimiter";
 import { ServiceError } from "@/utils/helpers";
 import { generateToken } from "@/utils/jwt";
+import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
 import bcrypt from "bcrypt";
 
 const normalizeEmail = (email: string) => email.toLowerCase().trim();
@@ -51,6 +53,12 @@ export async function login(email: string, password: string, ip: string) {
     }
 }
 
+// Logout
+export async function logout() {
+    const cookieStore = await cookies();
+    cookieStore.delete("token");
+}
+
 // Register
 export async function register(email: string, password: string, name: string, ip: string) {
     if (!email || !password || !name) {
@@ -96,5 +104,34 @@ export async function register(email: string, password: string, name: string, ip
             email: newUser.email
         },
         token
+    }
+}
+
+// Me
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+export async function getServerAuthUser() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+        throw new ServiceError("Unauthorized", 401);
+    }
+
+    try {
+        const { payload } = await jwtVerify(token, secret);
+        const userId = payload.id as string;
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true, name: true, email: true },
+        });
+
+        if (!user) {
+            throw new ServiceError("User not found", 404);
+        }
+
+        return user;
+    } catch (error) {
+        throw new ServiceError("Invalid token", 401);
     }
 }

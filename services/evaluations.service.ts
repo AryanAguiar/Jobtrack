@@ -13,29 +13,73 @@ export interface PaginatedEvaluationResult {
 }
 
 // Get all evaluations
-export async function getEvaluations(userId: string, page: number = 1, limit: number = 10): Promise<PaginatedEvaluationResult> {
+export async function getEvaluations(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    sortKey: string = "createdAt",
+    sortOrder: "asc" | "desc" = "desc"
+): Promise<PaginatedEvaluationResult> {
     const skip = (page - 1) * limit;
+
+    const where: any = {
+        resume: { userId }
+    };
+
+    if (search) {
+        where.OR = [
+            { job: { title: { contains: search, mode: "insensitive" } } },
+            { resume: { title: { contains: search, mode: "insensitive" } } }
+        ];
+    }
+
+    const orderBy: any = {};
+    if (sortKey === "matchScore") {
+        orderBy.matchScore = sortOrder;
+    } else {
+        orderBy.createdAt = sortOrder;
+    }
+
     const [evaluations, total] = await Promise.all([
         prisma.resumeEvaluations.findMany({
-            where: {
-                resume: { userId }
-            },
+            where,
             include: {
-                resume: true,
+                resume: {
+                    include: {
+                        parsedData: true
+                    }
+                },
                 job: true,
             },
             skip,
             take: limit,
-            orderBy: { createdAt: "desc" }
+            orderBy
         }),
         prisma.resumeEvaluations.count({
-            where: {
-                resume: { userId }
-            }
+            where
         })
     ]);
+
+    const formattedData = evaluations.map(evaluation => ({
+        id: evaluation.id,
+        userId: evaluation.resume.userId,
+        resumeId: evaluation.resumeId,
+        resumeTitle: evaluation.resume.title,
+        jobTitle: evaluation.job.title,
+        matchScore: evaluation.matchScore,
+        summary: evaluation.summary,
+        breakdown: evaluation.breakdown,
+        parsedData: evaluation.resume.parsedData,
+        strengths: evaluation.strengths,
+        gaps: evaluation.gaps,
+        modelUsed: evaluation.modelUsed,
+        promptHash: evaluation.promptHash,
+        createdAt: evaluation.createdAt,
+    }));
+
     return {
-        data: evaluations,
+        data: formattedData,
         meta: {
             page,
             limit,
@@ -43,6 +87,42 @@ export async function getEvaluations(userId: string, page: number = 1, limit: nu
             totalPages: Math.ceil(total / limit)
         }
     }
+}
+
+// Get evaluation by id
+export async function getEvaluationById(id: string, userId: string) {
+    const evaluation = await prisma.resumeEvaluations.findFirst({
+        where: { id: id, resume: { userId } },
+        include: {
+            resume: {
+                include: {
+                    parsedData: true
+                }
+            },
+            job: true,
+        }
+    });
+
+    if (!evaluation) {
+        throw new ServiceError("Evaluation not found", 404);
+    }
+
+    return {
+        id: evaluation.id,
+        userId: evaluation.resume.userId,
+        resumeId: evaluation.resumeId,
+        resumeTitle: evaluation.resume.title,
+        jobTitle: evaluation.job.title,
+        matchScore: evaluation.matchScore,
+        summary: evaluation.summary,
+        breakdown: evaluation.breakdown,
+        parsedData: evaluation.resume.parsedData,
+        strengths: evaluation.strengths,
+        gaps: evaluation.gaps,
+        modelUsed: evaluation.modelUsed,
+        promptHash: evaluation.promptHash,
+        createdAt: evaluation.createdAt,
+    };
 }
 
 // Create evaluation
