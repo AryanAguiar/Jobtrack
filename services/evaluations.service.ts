@@ -205,3 +205,21 @@ export async function createOrUpdateEvaluation(userId: string, resumeId: string,
 
     return savedEvaluation;
 }
+
+// Delete an evaluation
+export async function deleteEvaluation(id: string, userId: string) {
+    const evaluation = await prisma.resumeEvaluations.findFirst({
+        where: { id, resume: { userId } },
+        select: { id: true }
+    });
+
+    if (!evaluation) {
+        throw new ServiceError("Evaluation not found", 404);
+    }
+
+    await prisma.resumeEvaluations.delete({
+        where: { id }
+    });
+
+    return { deleted: true };
+}

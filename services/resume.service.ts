@@ -18,19 +18,38 @@ export interface PaginatedResumesResult {
     };
 }
 
-// Get all resumes for a given user, including parsed data.
-export async function getUserResumes(userId: string, page: number = 1, limit: number = 10): Promise<PaginatedResumesResult> {
+// Get all resumes for a given user including parsed data
+export async function getUserResumes(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    sortKey?: "createdAt" | "title",
+    sortOrder?: "asc" | "desc"
+): Promise<PaginatedResumesResult> {
     const skip = (page - 1) * limit;
+
+    const where: any = {
+        userId
+    }
+
+    if (search) {
+        where.OR = [
+            { title: { contains: search, mode: "insensitive" } },
+            { fileName: { contains: search, mode: "insensitive" } },
+        ];
+    }
+
     const [resumes, total] = await Promise.all([
         prisma.resume.findMany({
-            where: { userId },
+            where,
             include: { parsedData: true },
             skip,
             take: limit,
-            orderBy: { createdAt: "desc" },
+            orderBy: sortKey && sortOrder ? { [sortKey]: sortOrder } : { createdAt: "desc" },
         }),
         prisma.resume.count({
-            where: { userId }
+            where
         })
     ]);
     return {

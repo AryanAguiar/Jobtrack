@@ -6,14 +6,15 @@ import { ServiceError } from "@/utils/helpers";
 // GET a single resume by ID
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const user = await getAuthUser(request);
     if (!user) {
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
     try {
-        const resume = await getResumeById(params.id, user.id);
+        const { id } = await params;
+        const resume = await getResumeById(id, user.id);
         return NextResponse.json(resume);
     } catch (error: any) {
         if (error instanceof ServiceError) {

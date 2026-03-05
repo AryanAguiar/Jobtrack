@@ -24,6 +24,9 @@ model Job {
   company String
   location String
   status JobStatus @default(APPLIED)
+  type JobType @default(FULL_TIME)
+  responsibilities String
+  requirements String
   salary String?
   description String
   link String?
@@ -47,6 +50,17 @@ enum JobStatus {
   OFFERED
   REJECTED
   WITHDRAWN
+  OPEN
+  CLOSED
+  DRAFT
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
 }
 
 model Resume { 

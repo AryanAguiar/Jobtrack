@@ -1,0 +1,186 @@
+"use client";
+
+import Navbar from "@/app/components/Navbar";
+import Link from "next/link";
+import { use, useEffect, useState } from "react";
+import { HiOutlineDocumentText, HiOutlineCalendar, HiOutlineHashtag, HiOutlineLightBulb, HiOutlineExclamationCircle, HiArrowLeft } from "react-icons/hi";
+
+export default function ResumePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
+    const [resume, setResume] = useState<any | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+
+        const fetchUser = async () => {
+            try {
+                const res = await fetch('/api/auth/me', {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch user");
+
+                const result = await res.json();
+                setUser(result);
+                setLoading(false);
+            } catch (error) {
+                setError(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to fetch user"
+                );
+                setLoading(false);
+            }
+        }
+
+        const fetchResume = async () => {
+            try {
+                const res = await fetch(`/api/resumes/${id}`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch resume");
+
+                const result = await res.json();
+                setResume(result);
+                setLoading(false);
+            } catch (error) {
+                setError(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to fetch resume"
+                );
+                setLoading(false);
+            }
+        };
+
+        fetchUser();
+        if (id) {
+            setLoading(true);
+            fetchResume();
+        }
+    }, [id]);
+
+    if (!id) return null;
+
+    return (
+        <div className="min-h-screen bg-gray-50/50">
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                <Navbar userName={user?.name || "Loading..."} />
+
+                <div className="mt-8">
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors mb-6 group"
+                    >
+                        <HiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform" />
+                        Back to Dashboard
+                    </Link>
+                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {loading ? (
+                            <div className="p-20 flex flex-col items-center justify-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
+                                <p className="text-gray-500 font-medium">Loading resume details...</p>
+                            </div>
+                        ) : error ? (
+                            <div className="p-20 text-center">
+                                <div className="bg-red-50 text-red-600 p-6 rounded-2xl inline-block max-w-md">
+                                    <h3 className="font-bold text-lg mb-2">Error Encountered</h3>
+                                    <p>{error}</p>
+                                </div>
+                            </div>
+                        ) : resume ? (
+                            <>
+
+                                <div className="p-8 pb-0 flex items-start gap-5">
+                                    <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl">
+                                        <HiOutlineDocumentText className="text-4xl" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-3xl font-extrabold text-gray-900 leading-tight">{resume.title}</h2>
+                                        <div className="flex items-center mt-2 text-sm text-gray-500 gap-4">
+                                            <div className="flex items-center">
+                                                <HiOutlineCalendar className="mr-1.5" />
+                                                <span>Uploaded {new Date(resume.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <HiOutlineHashtag className="mr-1.5" />
+                                                <span>{resume.fileName}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div className="p-8">
+                                    {resume.parsedData?.skills && resume.parsedData.skills.length > 0 && (
+                                        <div className="mb-8">
+                                            <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                                <span className="w-1.5 h-6 bg-purple-600 rounded-full"></span>
+                                                Identified Skills
+                                            </h3>
+                                            <div className="flex flex-wrap gap-2 bg-gray-50 p-6 rounded-2xl">
+                                                {resume.parsedData.skills.map((skill: string, i: number) => (
+                                                    <span
+                                                        key={i}
+                                                        className="bg-white border border-gray-100 px-3 py-1.5 rounded-xl text-sm text-gray-700 font-medium shadow-sm hover:shadow-md transition-shadow cursor-default"
+                                                    >
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {resume.parsedData?.experience && (
+                                            <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                                                <h3 className="text-md font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                                    <HiOutlineLightBulb className="text-yellow-500 text-xl" />
+                                                    Experience Highlight
+                                                </h3>
+                                                <p className="text-sm text-gray-600 leading-relaxed italic">
+                                                    {Array.isArray(resume.parsedData.experience) ? resume.parsedData.experience[0] : resume.parsedData.experience}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {resume.parsedData?.education && (
+                                            <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
+                                                <h3 className="text-md font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                                    <HiOutlineExclamationCircle className="text-blue-500 text-xl" />
+                                                    Education Info
+                                                </h3>
+                                                <p className="text-sm text-gray-600 leading-relaxed">
+                                                    {typeof resume.parsedData.education === 'string' ? resume.parsedData.education : JSON.stringify(resume.parsedData.education)}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="mt-10 pt-8 border-t border-gray-50 flex justify-end gap-3">
+
+                                        <a
+                                            href={resume.fileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200"
+                                        >
+                                            Download PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </>
+                        ) : null}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+

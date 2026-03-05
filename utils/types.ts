@@ -35,12 +35,10 @@ export interface ScoreBreakdown {
 
 export interface JobsProps {
     id: string;
-    onClose: () => void;
 }
 
 export interface ResumesProps {
     id: string;
-    onClose: () => void;
 }
 
 export interface AnalysisProps {
@@ -84,8 +82,12 @@ export interface JobType {
     location: string;
     salary: string;
     status: string;
-    createdAt: Date;
-    updatedAt: Date;
+    type: string;
+    link: string;
+    requirements: string;
+    responsibilities: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface ResumeType {
@@ -102,4 +104,21 @@ export interface ResumeType {
         experience: any;
         education: any;
     };
+}
+
+export interface jobFormValues {
+    title: string;
+    company: string;
+    location: string;
+    description: string;
+    requirements: string;
+    responsibilities: string;
+    salary: string;
+    type: string;
+    status: string;
+}
+
+export interface resumeFormValues {
+    title: string;
+    file: File;
 }

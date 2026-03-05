@@ -80,7 +80,7 @@ export async function getJobById(id: string, userId: string) {
 }
 
 // Create a job
-export async function createJob(userId: string, title: string, company: string, location: string, status: string, description: string, notes: string) {
+export async function createJob(userId: string, title: string, company: string, location: string, status: string, type: string, salary: string, link: string, requirements: string, responsibilities: string, description: string, notes: string) {
     if (!title || !company || !location || !status || !description) {
         throw new ServiceError("Missing required fields", 400);
     }
@@ -91,6 +91,11 @@ export async function createJob(userId: string, title: string, company: string, 
             company,
             location,
             status,
+            type,
+            salary,
+            link,
+            requirements,
+            responsibilities,
             description,
             notes,
             userId
@@ -107,6 +112,11 @@ export async function updateJob(
         company?: string;
         location?: string;
         status?: string;
+        type?: string;
+        salary?: string;
+        link?: string;
+        requirements?: string;
+        responsibilities?: string;
         description?: string;
         notes?: string;
     }

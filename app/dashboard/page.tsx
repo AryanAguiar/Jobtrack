@@ -33,8 +33,8 @@ export default function Dashboard() {
           <Analysis id={user?.id} />
         </div>
         <div className="flex flex-col gap-4 w-2/5">
-          <Jobs id={user?.id} onClose={() => { }} />
-          <Resumes id={user?.id} onClose={() => { }} />
+          <Jobs id={user?.id} />
+          <Resumes id={user?.id} />
         </div>
       </div>
     </div>

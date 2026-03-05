@@ -10,14 +10,15 @@ export async function POST(request: Request) {
     }
     try {
         const body = await request.json();
-        const { title, company, location, status, description, notes } = body;
-        const job = await createJob(user.id, title, company, location, status, description, notes);
+        const { title, company, location, status, type, salary, link, requirements, responsibilities, description, notes } = body;
+        const job = await createJob(user.id, title, company, location, status, type, salary, link, requirements, responsibilities, description, notes);
         return NextResponse.json(job, { status: 201 });
     }
     catch (error) {
         if (error instanceof ServiceError) {
             return NextResponse.json({ message: error.message }, { status: error.status });
         }
+        console.error("POST /api/jobs error:", error);
         return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }
 }
