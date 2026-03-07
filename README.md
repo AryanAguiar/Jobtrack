@@ -20,10 +20,6 @@ This project is my way of learning the stack deeply by building something comple
 - Cache evaluations intelligently using compound keys
 - Track prompt versions for reproducibility
 
-## Current Status:
-As of 18th Feb 2026, the API layer is complete.
-The frontend UI and additional features are still in progress.
-
 ## This Project's Tech Stack Consists Of:
 - Frontend / API: Next.js (App Router)
 - Database: PostgreSQL
@@ -49,4 +45,3 @@ http://localhost:3000
 
 ## Future Improvements:
 - Have to add resume storing facility
-- Load job from external link functionality
