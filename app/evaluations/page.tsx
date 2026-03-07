@@ -7,6 +7,7 @@ import { HiArrowLeft, HiMagnifyingGlass, HiChevronUpDown, HiOutlineDocumentText,
 import Navbar from "../components/Navbar";
 import { Autocomplete, TextField } from "@mui/material";
 import AnalyzeResumeForJob from "../components/AnalyzeResumeForJob";
+import { toast } from "sonner";
 
 const sortOptions = [
     { label: "Date", value: "createdAt" },
@@ -99,20 +100,32 @@ export default function Evaluations() {
     }, [page, debouncedSearch, sortKey, sortOrder]);
 
     const deleteAnalysis = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this evaluation?")) return;
-        try {
-            setLoading(true);
-            const res = await fetch(`/api/evaluations/${id}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-            if (!res.ok) throw new Error("Failed to delete evaluation");
-            setData((prev) => prev.filter((item) => item.id !== id));
-        } catch (error) {
-            setError(error instanceof Error ? error.message : "Failed to delete evaluation");
-        } finally {
-            setLoading(false);
-        }
+        toast('Are you sure you want to delete this evaluation?', {
+            action: {
+                label: 'Confirm',
+                onClick: async () => {
+                    try {
+                        setLoading(true);
+                        const res = await fetch(`/api/evaluations/${id}`, {
+                            method: "DELETE",
+                            headers: { "Content-Type": "application/json" },
+                        });
+                        if (!res.ok) throw new Error("Failed to delete evaluation");
+                        setData((prev) => prev.filter((item) => item.id !== id));
+                        toast.success("Evaluation deleted successfully");
+                    } catch (error) {
+                        setError(error instanceof Error ? error.message : "Failed to delete evaluation");
+                        toast.error("Failed to delete evaluation");
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => { }
+            }
+        });
     };
 
     return (
@@ -196,7 +209,7 @@ export default function Evaluations() {
 
                 <div className="mt-8">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-3xl border border-gray-100">
+                        <div className="flex flex-col items-center justify-center p-10 sm:p-20 bg-white rounded-3xl border border-gray-100">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                             <p className="text-gray-500 font-medium">Loading evaluations...</p>
                         </div>
@@ -206,7 +219,7 @@ export default function Evaluations() {
                             <p>{error}</p>
                         </div>
                     ) : data.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-20 text-center">
+                        <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-10 sm:p-20 text-center">
                             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <HiOutlineDocumentText className="text-3xl text-gray-300" />
                             </div>

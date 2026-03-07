@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { Formik, Form } from "formik";
 import { useState, useRef } from "react";
 import { FiPlus, FiFile, FiX } from "react-icons/fi";
+import { toast } from "sonner";
 
 const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
@@ -18,22 +19,17 @@ export default function UploadResumeModal({ isModal = false, onSuccess, onClose 
         try {
             // Check if file is selected
             if (!values.file) {
-                alert("Please select a file first");
+                toast.error("Please select a file first");
                 return;
             }
 
-            // In a real application, you'd use FormData to upload the file
-            // For now, let's simulate the API call with the values
+            const formData = new FormData();
+            formData.append("title", values.title);
+            formData.append("file", values.file);
+
             const response = await fetch("/api/resumes", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    title: values.title,
-                    // Note: Base64 or FormData would be needed for actual file upload
-                    fileName: values.file.name,
-                }),
+                body: formData,
             });
 
             if (!response.ok) {
@@ -42,10 +38,11 @@ export default function UploadResumeModal({ isModal = false, onSuccess, onClose 
             }
             const data = await response.json();
             console.log(data);
+            toast.success("Resume uploaded successfully");
             if (onSuccess) onSuccess();
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "Something went wrong during upload");
+            toast.error(error.message || "Something went wrong during upload");
         }
     }
 

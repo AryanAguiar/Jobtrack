@@ -22,8 +22,8 @@ const Navbar: FC<NavbarProps> = ({ userName }) => {
         <nav className="flex items-center justify-between py-2 mt-7 text-black">
 
             <div className="flex-1">
-                <span className="font-bold">Welcome, {userName}</span>
-                <p className="text-gray-400 text-sm font-medium">Your overview</p>
+                <span className="font-bold text-sm sm:text-base">Welcome, {userName}</span>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">Your overview</p>
             </div>
 
             <div className="flex gap-4 items-center">

@@ -2,10 +2,11 @@
 import { useEffect, useState } from "react";
 import { ResumeType } from "@/utils/types";
 import Link from "next/link";
-import { HiArrowLeft, HiMagnifyingGlass, HiChevronUpDown, HiOutlineBriefcase, HiOutlineMapPin, HiOutlineCurrencyDollar, HiOutlineClock, HiPlus } from "react-icons/hi2";
+import { HiArrowLeft, HiMagnifyingGlass, HiChevronUpDown, HiOutlineBriefcase, HiOutlineMapPin, HiOutlineCurrencyDollar, HiOutlineClock, HiPlus, HiOutlineTrash } from "react-icons/hi2";
 import Navbar from "../components/Navbar";
 import { Autocomplete, TextField } from "@mui/material";
 import UploadResumeModal from "../components/UploadResumeModal";
+import { toast } from "sonner";
 
 const sortOptions = [
     { label: "Date", value: "createdAt" },
@@ -97,6 +98,35 @@ export default function ResumesPage() {
         fetchResumes();
     }, [page, debouncedSearch, sortKey, sortOrder]);
 
+    const deleteResume = async (id: string) => {
+        toast('Are you sure you want to delete this resume?', {
+            action: {
+                label: 'Confirm',
+                onClick: async () => {
+                    try {
+                        setLoading(true);
+                        const res = await fetch(`/api/resumes/${id}`, {
+                            method: "DELETE",
+                            headers: { "Content-Type": "application/json" },
+                        });
+                        if (!res.ok) throw new Error("Failed to delete resume");
+                        setData((prev) => prev.filter((item) => item.id !== id));
+                        toast.success("Resume deleted successfully");
+                    } catch (error) {
+                        setError(error instanceof Error ? error.message : "Failed to delete resume");
+                        toast.error("Failed to delete resume");
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => { }
+            }
+        });
+    };
+
     return (
         <div className="min-h-screen bg-gray-50/50 pb-20">
             <div className="max-w-7xl mx-auto px-4 py-8">
@@ -178,7 +208,7 @@ export default function ResumesPage() {
 
                 <div className="mt-8">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-3xl border border-gray-100">
+                        <div className="flex flex-col items-center justify-center p-10 sm:p-20 bg-white rounded-3xl border border-gray-100">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                             <p className="text-gray-500 font-medium">Loading resumes...</p>
                         </div>
@@ -188,7 +218,7 @@ export default function ResumesPage() {
                             <p>{error}</p>
                         </div>
                     ) : data.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-20 text-center">
+                        <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-10 sm:p-20 text-center">
                             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <HiOutlineBriefcase className="text-3xl text-gray-300" />
                             </div>
@@ -207,7 +237,17 @@ export default function ResumesPage() {
                                                 <div className="p-3 bg-purple-50 rounded-2xl group-hover:bg-purple-600 transition-colors text-purple-600 group-hover:text-white transition-colors">
                                                     <HiOutlineBriefcase className="text-2xl" />
                                                 </div>
-
+                                                <button
+                                                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                                    title="Delete Resume"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        deleteResume(resume.id);
+                                                    }}
+                                                >
+                                                    <HiOutlineTrash className="text-xl" />
+                                                </button>
                                             </div>
 
                                             <div className="flex-1">

@@ -5,6 +5,8 @@ import { AnalysisType } from "@/utils/types";
 import Navbar from "../../components/Navbar";
 import Link from "next/link";
 import { HiArrowLeft } from "react-icons/hi2";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function AnalysisDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -12,6 +14,7 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -46,6 +49,35 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
         }
     }, [id]);
 
+    const deleteAnalysis = async () => {
+        toast('Are you sure you want to delete this evaluation?', {
+            action: {
+                label: 'Confirm',
+                onClick: async () => {
+                    try {
+                        setLoading(true);
+                        const res = await fetch(`/api/evaluations/${id}`, {
+                            method: "DELETE",
+                            headers: { "Content-Type": "application/json" },
+                        });
+                        if (!res.ok) throw new Error("Failed to delete evaluation");
+                        toast.success("Evaluation deleted successfully");
+                        router.push('/evaluations');
+                    } catch (error) {
+                        setError(error instanceof Error ? error.message : "Failed to delete evaluation");
+                        toast.error("Failed to delete evaluation");
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => { }
+            }
+        });
+    };
+
     if (!id) return null;
 
     return (
@@ -64,12 +96,12 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
 
                     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {loading ? (
-                            <div className="p-20 flex flex-col items-center justify-center">
+                            <div className="p-10 sm:p-20 flex flex-col items-center justify-center">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                                 <p className="text-gray-500 font-medium">Loading evaluation...</p>
                             </div>
                         ) : error ? (
-                            <div className="p-20 text-center">
+                            <div className="p-10 sm:p-20 text-center">
                                 <div className="bg-red-50 text-red-600 p-6 rounded-2xl inline-block max-w-md">
                                     <h3 className="font-bold text-lg mb-2">Error</h3>
                                     <p>{error}</p>
@@ -78,10 +110,10 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                         ) : analysis ? (
                             <div className="divide-y divide-gray-100">
                                 {/* Header Section */}
-                                <div className="p-8 lg:p-12 bg-gradient-to-br from-white to-gray-50/50">
+                                <div className="p-4 sm:p-6 lg:p-12 bg-gradient-to-br from-white to-gray-50/50">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                         <div>
-                                            <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 leading-tight">
+                                            <h1 className="text-xl sm:text-2xl lg:text-4xl font-extrabold text-gray-900 leading-tight">
                                                 {analysis.resumeTitle} <span className="text-blue-200 mx-2">/</span> {analysis.jobTitle}
                                             </h1>
                                             <div className="flex items-center gap-4 mt-4">
@@ -100,16 +132,22 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                                         <div className="flex items-center gap-4">
                                             <div className="text-right">
                                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Match Score</p>
-                                                <p className="text-5xl font-black text-blue-600 tabular-nums">
+                                                <p className="text-3xl sm:text-5xl font-black text-blue-600 tabular-nums">
                                                     {Math.round(analysis.matchScore)}<span className="text-2xl ml-0.5">%</span>
                                                 </p>
                                             </div>
+                                            <button
+                                                onClick={deleteAnalysis}
+                                                className="px-5 py-2.5 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors shadow-sm ml-4 text-sm"
+                                            >
+                                                Delete
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Main Content Section */}
-                                <div className="p-8 lg:p-12 space-y-12">
+                                <div className="p-4 sm:p-6 lg:p-12 space-y-12">
                                     {/* Summary Section */}
                                     <section>
                                         <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">

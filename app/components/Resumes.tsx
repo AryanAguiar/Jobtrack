@@ -45,7 +45,7 @@ const Resumes: FC<ResumesProps> = ({ id }) => {
 
     return (
         <>
-            <div className="rounded-xl overflow-hidden bg-white shadow-sm border border-gray-100 flex flex-col h-[500px]">
+            <div className="rounded-xl overflow-hidden bg-white shadow-sm border border-gray-100 flex flex-col min-h-[250px] h-auto lg:h-[500px]">
                 <div className="p-5 flex items-center justify-between border-b border-gray-50">
                     <h1 className="text-lg font-bold text-gray-900 border-l-4 border-purple-500 pl-3">Recent Resumes</h1>
                     <div className="flex items-center gap-3">

@@ -6,6 +6,7 @@ import { HiArrowLeft, HiMagnifyingGlass, HiChevronUpDown, HiOutlineBriefcase, Hi
 import Navbar from "../components/Navbar";
 import { Autocomplete, TextField } from "@mui/material";
 import JobForm from "../components/JobForm";
+import { toast } from "sonner";
 
 const sortOptions = [
     { label: "Date", value: "createdAt" },
@@ -99,20 +100,32 @@ export default function JobsPage() {
     }, [page, debouncedSearch, sortKey, sortOrder]);
 
     const deleteJob = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this job?")) return;
-        try {
-            setLoading(true);
-            const res = await fetch(`/api/jobs/${id}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-            if (!res.ok) throw new Error("Failed to delete job");
-            setData((prev) => prev.filter((item) => item.id !== id));
-        } catch (error) {
-            setError(error instanceof Error ? error.message : "Failed to delete job");
-        } finally {
-            setLoading(false);
-        }
+        toast('Are you sure you want to delete this job?', {
+            action: {
+                label: 'Confirm',
+                onClick: async () => {
+                    try {
+                        setLoading(true);
+                        const res = await fetch(`/api/jobs/${id}`, {
+                            method: "DELETE",
+                            headers: { "Content-Type": "application/json" },
+                        });
+                        if (!res.ok) throw new Error("Failed to delete job");
+                        setData((prev) => prev.filter((item) => item.id !== id));
+                        toast.success("Job deleted successfully");
+                    } catch (error) {
+                        setError(error instanceof Error ? error.message : "Failed to delete job");
+                        toast.error("Failed to delete job");
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => { }
+            }
+        });
     };
 
     const getStatusColor = (status: string) => {
@@ -205,7 +218,7 @@ export default function JobsPage() {
 
                 <div className="mt-8">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center p-20 bg-white rounded-3xl border border-gray-100">
+                        <div className="flex flex-col items-center justify-center p-10 sm:p-20 bg-white rounded-3xl border border-gray-100">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                             <p className="text-gray-500 font-medium">Loading jobs...</p>
                         </div>
@@ -215,7 +228,7 @@ export default function JobsPage() {
                             <p>{error}</p>
                         </div>
                     ) : data.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-20 text-center">
+                        <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-10 sm:p-20 text-center">
                             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <HiOutlineBriefcase className="text-3xl text-gray-300" />
                             </div>
@@ -235,7 +248,7 @@ export default function JobsPage() {
                                                     <HiOutlineBriefcase className="text-2xl" />
                                                 </div>
                                                 <div className="flex flex-col items-end gap-2">
-                                                    <div className="flex gap-2">
+                                                    <div className="flex flex-wrap gap-2">
                                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(job.status)}`}>
                                                             {job.status}
                                                         </span>

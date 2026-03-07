@@ -5,6 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { HiOutlineBriefcase, HiOutlineLocationMarker, HiOutlineCash, HiOutlineDocumentText, HiOutlineClipboardList, HiOutlineAcademicCap, HiOutlineOfficeBuilding, HiOutlineLink, HiOutlineAnnotation } from "react-icons/hi";
 import { Autocomplete, TextField } from "@mui/material";
+import { toast } from "sonner";
 
 const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
@@ -71,9 +72,11 @@ export default function JobForm({ isModal = false, onSuccess, onClose }: { isMod
             }
             const data = await response.json();
             console.log(data);
+            toast.success("Job created successfully");
             if (onSuccess) onSuccess();
         } catch (error: any) {
             console.error(error);
+            toast.error(error.message || "Failed to create job");
         }
     }
 

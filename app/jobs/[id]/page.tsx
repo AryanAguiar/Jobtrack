@@ -5,6 +5,8 @@ import { JobType } from "@/utils/types";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { HiArrowLeft } from "react-icons/hi";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function JobPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -12,6 +14,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
+    const router = useRouter();
 
     useEffect(() => {
 
@@ -58,6 +61,35 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
         }
     }, [id]);
 
+    const deleteJob = async () => {
+        toast('Are you sure you want to delete this job?', {
+            action: {
+                label: 'Confirm',
+                onClick: async () => {
+                    try {
+                        setLoading(true);
+                        const res = await fetch(`/api/jobs/${id}`, {
+                            method: "DELETE",
+                            headers: { "Content-Type": "application/json" },
+                        });
+                        if (!res.ok) throw new Error("Failed to delete job");
+                        toast.success("Job deleted successfully");
+                        router.push('/jobs');
+                    } catch (error) {
+                        setError(error instanceof Error ? error.message : "Failed to delete job");
+                        toast.error("Failed to delete job");
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => { }
+            }
+        });
+    };
+
     if (!id) return null;
 
     return (
@@ -75,12 +107,12 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                     </Link>
                     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {loading ? (
-                            <div className="p-20 flex flex-col items-center justify-center">
+                            <div className="p-10 sm:p-20 flex flex-col items-center justify-center">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
                                 <p className="text-gray-500 font-medium">Loading details...</p>
                             </div>
                         ) : error ? (
-                            <div className="p-20 text-center">
+                            <div className="p-10 sm:p-20 text-center">
                                 <div className="bg-red-50 text-red-600 p-6 rounded-2xl inline-block max-w-md">
                                     <h3 className="font-bold text-lg mb-2">Error Encountered</h3>
                                     <p>{error}</p>
@@ -88,7 +120,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                             </div>
                         ) : job ? (
                             <>
-                                <div className="p-8 pb-0">
+                                <div className="p-4 sm:p-8 pb-0">
                                     <div className="flex flex-wrap items-center gap-2 mb-4">
                                         <span className="px-3 py-1 text-[10px] uppercase tracking-widest font-black rounded-full bg-blue-50 text-blue-600 border border-blue-100">
                                             {job.status}
@@ -102,23 +134,31 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                                     </div>
                                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                                         <div>
-                                            <h2 className="text-4xl font-extrabold text-gray-900 leading-tight">{job.title}</h2>
-                                            <p className="text-2xl text-gray-500 font-medium mt-1">{job.company}</p>
+                                            <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-tight">{job.title}</h2>
+                                            <p className="text-lg sm:text-2xl text-gray-500 font-medium mt-1">{job.company}</p>
                                         </div>
-                                        {job.link && (
-                                            <a
-                                                href={job.link.startsWith("http") ? job.link : `https://${job.link}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25 text-sm"
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={deleteJob}
+                                                className="inline-flex items-center justify-center px-6 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all text-sm"
                                             >
-                                                Apply Now
-                                            </a>
-                                        )}
+                                                Delete
+                                            </button>
+                                            {job.link && (
+                                                <a
+                                                    href={job.link.startsWith("http") ? job.link : `https://${job.link}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25 text-sm"
+                                                >
+                                                    Apply Now
+                                                </a>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="p-8">
+                                <div className="p-4 sm:p-6 lg:p-8">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-50 rounded-2xl mb-8 border border-gray-100">
                                         <div className="space-y-1">
                                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Location</p>

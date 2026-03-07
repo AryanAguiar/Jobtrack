@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { JobType, ResumeType } from "@/utils/types";
 import { Autocomplete, TextField, Box, Typography, CircularProgress } from "@mui/material";
+import { toast } from "sonner";
 
 interface AnalyzeResumeForJobProps {
     isModal?: boolean;
@@ -74,10 +75,13 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                 throw new Error(errorData.message || "Failed to analyze resume.");
             }
 
+            toast.success("Analysis started successfully!");
             if (onSuccess) onSuccess();
             if (onClose) onClose();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "An error occurred during analysis.");
+            const errorMessage = err instanceof Error ? err.message : "An error occurred during analysis.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

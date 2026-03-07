@@ -28,11 +28,11 @@ export default function Dashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <Navbar userName={user?.name || "Loading..."} />
-      <div className="flex gap-4 mt-6">
-        <div className="w-3/5">
+      <div className="flex flex-col lg:flex-row gap-4 mt-6">
+        <div className="w-full lg:w-3/5">
           <Analysis id={user?.id} />
         </div>
-        <div className="flex flex-col gap-4 w-2/5">
+        <div className="flex flex-col gap-4 w-full lg:w-2/5">
           <Jobs id={user?.id} />
           <Resumes id={user?.id} />
         </div>

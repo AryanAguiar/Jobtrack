@@ -48,5 +48,5 @@ Server Runs On:
 http://localhost:3000
 
 ## Future Improvements:
-- Streaming LLM responses
-- Evaluation analytics dashboard
+- Have to add resume storing facility
+- Load job from external link functionality

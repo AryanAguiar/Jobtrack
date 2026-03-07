@@ -4,6 +4,8 @@ import Navbar from "@/app/components/Navbar";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { HiOutlineDocumentText, HiOutlineCalendar, HiOutlineHashtag, HiOutlineLightBulb, HiOutlineExclamationCircle, HiArrowLeft } from "react-icons/hi";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function ResumePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -11,6 +13,7 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
+    const router = useRouter();
 
     useEffect(() => {
 
@@ -65,6 +68,35 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
         }
     }, [id]);
 
+    const deleteResume = async () => {
+        toast('Are you sure you want to delete this resume?', {
+            action: {
+                label: 'Confirm',
+                onClick: async () => {
+                    try {
+                        setLoading(true);
+                        const res = await fetch(`/api/resumes/${id}`, {
+                            method: "DELETE",
+                            headers: { "Content-Type": "application/json" },
+                        });
+                        if (!res.ok) throw new Error("Failed to delete resume");
+                        toast.success("Resume deleted successfully");
+                        router.push('/dashboard'); // Changed to dashboard as /resumes might not exist or be the correct redirect
+                    } catch (error) {
+                        setError(error instanceof Error ? error.message : "Failed to delete resume");
+                        toast.error("Failed to delete resume");
+                    } finally {
+                        setLoading(false);
+                    }
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => { }
+            }
+        });
+    };
+
     if (!id) return null;
 
     return (
@@ -82,12 +114,12 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                     </Link>
                     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {loading ? (
-                            <div className="p-20 flex flex-col items-center justify-center">
+                            <div className="p-10 sm:p-20 flex flex-col items-center justify-center">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
                                 <p className="text-gray-500 font-medium">Loading resume details...</p>
                             </div>
                         ) : error ? (
-                            <div className="p-20 text-center">
+                            <div className="p-10 sm:p-20 text-center">
                                 <div className="bg-red-50 text-red-600 p-6 rounded-2xl inline-block max-w-md">
                                     <h3 className="font-bold text-lg mb-2">Error Encountered</h3>
                                     <p>{error}</p>
@@ -96,13 +128,13 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                         ) : resume ? (
                             <>
 
-                                <div className="p-8 pb-0 flex items-start gap-5">
+                                <div className="p-4 sm:p-6 lg:p-8 pb-0 flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
                                     <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl">
                                         <HiOutlineDocumentText className="text-4xl" />
                                     </div>
                                     <div>
-                                        <h2 className="text-3xl font-extrabold text-gray-900 leading-tight">{resume.title}</h2>
-                                        <div className="flex items-center mt-2 text-sm text-gray-500 gap-4">
+                                        <h2 className="text-xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{resume.title}</h2>
+                                        <div className="flex flex-wrap items-center mt-2 text-sm text-gray-500 gap-2 sm:gap-4">
                                             <div className="flex items-center">
                                                 <HiOutlineCalendar className="mr-1.5" />
                                                 <span>Uploaded {new Date(resume.createdAt).toLocaleDateString()}</span>
@@ -116,7 +148,7 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                                 </div>
 
 
-                                <div className="p-8">
+                                <div className="p-4 sm:p-6 lg:p-8">
                                     {resume.parsedData?.skills && resume.parsedData.skills.length > 0 && (
                                         <div className="mb-8">
                                             <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
@@ -163,7 +195,12 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                                     </div>
 
                                     <div className="mt-10 pt-8 border-t border-gray-50 flex justify-end gap-3">
-
+                                        <button
+                                            onClick={deleteResume}
+                                            className="px-6 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold hover:bg-red-100 transition-colors shadow-sm"
+                                        >
+                                            Delete
+                                        </button>
                                         <a
                                             href={resume.fileUrl}
                                             target="_blank"
