@@ -69,7 +69,7 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
     }, [id]);
 
     const deleteResume = async () => {
-        toast('Are you sure you want to delete this resume?', {
+        toast("Are you sure you want to delete this resume?, Deleting the resume will also delete it's evaluations", {
             action: {
                 label: 'Confirm',
                 onClick: async () => {
@@ -149,50 +149,12 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
 
 
                                 <div className="p-4 sm:p-6 lg:p-8">
-                                    {resume.parsedData?.skills && resume.parsedData.skills.length > 0 && (
-                                        <div className="mb-8">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                                <span className="w-1.5 h-6 bg-purple-600 rounded-full"></span>
-                                                Identified Skills
-                                            </h3>
-                                            <div className="flex flex-wrap gap-2 bg-gray-50 p-6 rounded-2xl">
-                                                {resume.parsedData.skills.map((skill: string, i: number) => (
-                                                    <span
-                                                        key={i}
-                                                        className="bg-white border border-gray-100 px-3 py-1.5 rounded-xl text-sm text-gray-700 font-medium shadow-sm hover:shadow-md transition-shadow cursor-default"
-                                                    >
-                                                        {skill}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {resume.parsedData?.experience && (
-                                            <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
-                                                <h3 className="text-md font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <HiOutlineLightBulb className="text-yellow-500 text-xl" />
-                                                    Experience Highlight
-                                                </h3>
-                                                <p className="text-sm text-gray-600 leading-relaxed italic">
-                                                    {Array.isArray(resume.parsedData.experience) ? resume.parsedData.experience[0] : resume.parsedData.experience}
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {resume.parsedData?.education && (
-                                            <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm">
-                                                <h3 className="text-md font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                                    <HiOutlineExclamationCircle className="text-blue-500 text-xl" />
-                                                    Education Info
-                                                </h3>
-                                                <p className="text-sm text-gray-600 leading-relaxed">
-                                                    {typeof resume.parsedData.education === 'string' ? resume.parsedData.education : JSON.stringify(resume.parsedData.education)}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <iframe
+                                        src={`/api/resumes/${id}/view#toolbar=0`}
+                                        width="100%"
+                                        height="700px"
+                                        className="rounded-xl border border-gray-200 shadow-sm"
+                                    />
 
                                     <div className="mt-10 pt-8 border-t border-gray-50 flex justify-end gap-3">
                                         <button
@@ -202,7 +164,7 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                                             Delete
                                         </button>
                                         <a
-                                            href={resume.fileUrl}
+                                            href={`/api/resumes/${id}/download`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200"

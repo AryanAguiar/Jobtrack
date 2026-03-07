@@ -1,5 +1,7 @@
 import fs from 'fs';
+import path from 'path';
 import pdf from 'pdf-parse/lib/pdf-parse.js';
+import mammoth from 'mammoth';
 
 interface ParsedResult {
     text: string;
@@ -7,12 +9,26 @@ interface ParsedResult {
     skills: string[];
     experience: string[];
     education: string[];
+    isResume: boolean;
+}
+
+async function extractText(filePath: string): Promise<string> {
+    const ext = path.extname(filePath).toLowerCase();
+    const dataBuffer = fs.readFileSync(filePath);
+
+    if (ext === '.pdf') {
+        const pdfData = await pdf(dataBuffer);
+        return pdfData.text;
+    } else if (ext === '.docx' || ext === '.doc') {
+        const result = await mammoth.extractRawText({ buffer: dataBuffer });
+        return result.value;
+    } else {
+        throw new Error(`Unsupported file type: ${ext}`);
+    }
 }
 
 export async function parsePdf(filePath: string): Promise<ParsedResult> {
-    const dataBuffer = fs.readFileSync(filePath);
-    const pdfData = await pdf(dataBuffer);
-    const text = pdfData.text;
+    const text = await extractText(filePath);
 
     const lowerText = text.toLowerCase();
     const keywords: string[] = [];
@@ -66,11 +82,30 @@ export async function parsePdf(filePath: string): Promise<ParsedResult> {
 
     keywords.push(...skills);
 
+    const resumeSectionKeywords = [
+        "experience", "employment", "work history", "career",
+        "education", "academic", "degree", "university", "college",
+        "skills", "technologies", "proficiencies",
+        "projects", "portfolio",
+        "summary", "objective", "profile", "about me",
+        "certifications", "achievements", "awards"
+    ];
+
+    let sectionMatchCount = 0;
+    for (const keyword of resumeSectionKeywords) {
+        if (lowerText.includes(keyword)) {
+            sectionMatchCount++;
+        }
+    }
+
+    const isResume = sectionMatchCount >= 2;
+
     return {
         text,
         keywords,
         skills,
         experience,
-        education
+        education,
+        isResume
     };
 }

@@ -34,7 +34,7 @@ export default function UploadResumeModal({ isModal = false, onSuccess, onClose 
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to upload resume");
+                throw new Error(errorData.message || "Failed to upload resume");
             }
             const data = await response.json();
             console.log(data);
@@ -104,7 +104,7 @@ export default function UploadResumeModal({ isModal = false, onSuccess, onClose 
                             <input
                                 ref={fileInputRef}
                                 type="file"
-                                accept=".pdf"
+                                accept=".pdf,.doc,.docx"
                                 className="hidden"
                                 onChange={(e) => {
                                     if (e.target.files && e.target.files[0]) {
@@ -134,6 +134,8 @@ export default function UploadResumeModal({ isModal = false, onSuccess, onClose 
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setFieldValue("file", null);
+                                                setFieldValue("title", "");
+                                                if (fileInputRef.current) fileInputRef.current.value = "";
                                             }}
                                             className="mt-2 text-sm text-red-500 hover:text-red-600 flex items-center gap-1 font-medium"
                                         >
@@ -147,7 +149,7 @@ export default function UploadResumeModal({ isModal = false, onSuccess, onClose 
                                         </div>
                                         <div className="text-center">
                                             <p className="text-lg font-bold text-gray-900">Upload Resume</p>
-                                            <p className="text-sm text-gray-500 mt-1">Click or drag and drop your PDF here</p>
+                                            <p className="text-sm text-gray-500 mt-1">Click or drag and drop your PDF or Word file here</p>
                                         </div>
                                     </>
                                 )}

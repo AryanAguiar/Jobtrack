@@ -26,7 +26,7 @@ export async function evaluateResume(resumeText: string, jobText: string, userId
                    - "ts" = "typescript"
                 5. For "requiredYears", extract the MINIMUM years of experience required. If the job says "3+ years", use 3. If no years mentioned, use 0.
                 6. For "candidateYears", calculate total years from the candidate's work experience entries. If not clear, estimate from the resume context.
-                7. For education fields, use ONLY these standardized values: "high school", "diploma", "bachelor degree", "master degree", "doctorate degree".
+                7. For education fields, extract the HIGHEST level of education mentioned. Use ONLY these exact standardized values: "high school", "diploma", "bachelor degree", "master degree", "doctorate degree". (Map variations like B.Sc/B.A/BS to "bachelor degree", M.Sc/M.A/MS/MBA to "master degree", and PhD to "doctorate degree").
                 8. The "summary" should be 2-3 sentences explaining the overall fit.
                 9. "strengths" should list specific matching qualifications the candidate has.
                 10. "gaps" should list ONLY specific missing requirements — do NOT list a gap if the candidate has the skill or an equivalent/synonym.

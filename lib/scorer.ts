@@ -72,12 +72,12 @@ function skillsMatch(required: string, candidate: string): boolean {
 
 function normalizeEducation(input: string): string {
     const lower = input.toLowerCase().trim();
-    if (lower.includes("bsc") || lower.includes("bachelor") || lower.includes("b.tech") || lower.includes("btech") || lower.includes("b.e.") || lower.includes("b.sc")) return "bachelor degree";
-    if (lower.includes("msc") || lower.includes("master") || lower.includes("m.tech") || lower.includes("mtech") || lower.includes("m.e.") || lower.includes("m.sc") || lower.includes("mba")) return "master degree";
-    if (lower.includes("phd") || lower.includes("doctorate") || lower.includes("ph.d")) return "doctorate degree";
+    if (/bachelor|b\.\s*sc|bsc|\bb\.?s\.?\b|\bb\.?a\.?\b|b\.\s*tech|btech|b\.\s*e\./i.test(lower)) return "bachelor degree";
+    if (/master|m\.\s*sc|msc|\bm\.?s\.?\b|\bm\.?a\.?\b|mba|m\.\s*tech|mtech|m\.\s*e\./i.test(lower)) return "master degree";
+    if (/doctorate|ph\.\s*d|phd/i.test(lower)) return "doctorate degree";
     if (lower.includes("diploma")) return "diploma";
-    if (lower.includes("hsc") || lower.includes("12th") || lower.includes("high school")) return "high school";
-    if (lower.includes("ssc") || lower.includes("10th") || lower.includes("secondary")) return "secondary school";
+    if (/high school|12th|hsc/i.test(lower)) return "high school";
+    if (/secondary school|10th|ssc/i.test(lower)) return "secondary school";
 
     return lower;
 }

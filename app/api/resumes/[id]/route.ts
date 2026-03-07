@@ -2,6 +2,8 @@ import { getAuthUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { getResumeById, deleteResume } from "@/services/resume.service";
 import { ServiceError } from "@/utils/helpers";
+import path from "path";
+import fs from "fs";
 
 // GET a single resume by ID
 export async function GET(
@@ -27,7 +29,7 @@ export async function GET(
 // DELETE a resume by ID
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const user = await getAuthUser(request);
     if (!user) {
@@ -35,7 +37,8 @@ export async function DELETE(
     }
 
     try {
-        const result = await deleteResume(params.id, user.id);
+        const { id } = await params;
+        const result = await deleteResume(id, user.id);
         return NextResponse.json({ message: "Resume deleted successfully", ...result });
     } catch (error: any) {
         if (error instanceof ServiceError) {

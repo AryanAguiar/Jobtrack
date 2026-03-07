@@ -104,6 +104,12 @@ export async function uploadResume(file: File, title: string, userId: string) {
     fs.writeFileSync(filePath, buffer);
 
     const parsed = await parsePdf(filePath);
+
+    if (!parsed.isResume) {
+        fs.unlinkSync(filePath);
+        throw new ServiceError("The uploaded file does not appear to be a valid resume.", 400);
+    }
+
     const cleanedText = normalizeText(parsed.text);
     const resumeHash = hashText(cleanedText);
     const resume = await prisma.resume.create({
@@ -131,6 +137,10 @@ export async function uploadResume(file: File, title: string, userId: string) {
 
 // Delete a resume by id, scoped to a user. Also removes the file from disk if it exists.
 export async function deleteResume(resumeId: string, userId: string) {
+    if (!resumeId) {
+        throw new ServiceError("Resume ID is required", 400);
+    }
+
     const resume = await prisma.resume.findFirst({
         where: { id: resumeId, userId },
     });
