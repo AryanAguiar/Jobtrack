@@ -51,6 +51,7 @@ export interface AnalysisType {
     userId: string;
     resumeId: string;
     resumeTitle: string;
+    resumeExpiry: Date;
     jobTitle: string;
     matchScore: number;
     summary: string;
@@ -99,6 +100,7 @@ export interface ResumeType {
     mimeType: string;
     createdAt: Date;
     updatedAt: Date;
+    expiresAt: Date;
     parsedData?: {
         skills: string[];
         experience: any;

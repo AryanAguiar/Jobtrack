@@ -2,7 +2,6 @@
 
 import Navbar from "@/app/components/Navbar";
 import { JobType } from "@/utils/types";
-import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { HiArrowLeft } from "react-icons/hi";
 import { toast } from "sonner";
@@ -74,7 +73,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                         });
                         if (!res.ok) throw new Error("Failed to delete job");
                         toast.success("Job deleted successfully");
-                        router.push('/jobs');
+                        router.back();
                     } catch (error) {
                         setError(error instanceof Error ? error.message : "Failed to delete job");
                         toast.error("Failed to delete job");
@@ -98,13 +97,13 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                 <Navbar userName={user?.name || "Loading..."} />
 
                 <div className="mt-8">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors mb-6 group"
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group cursor-pointer"
                     >
                         <HiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform" />
-                        Back to Dashboard
-                    </Link>
+                        Go Back
+                    </button>
                     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {loading ? (
                             <div className="p-10 sm:p-20 flex flex-col items-center justify-center">
@@ -133,9 +132,9 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                                         </span>
                                     </div>
                                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                                        <div>
-                                            <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-tight">{job.title}</h2>
-                                            <p className="text-lg sm:text-2xl text-gray-500 font-medium mt-1">{job.company}</p>
+                                        <div className="min-w-0 flex-1">
+                                            <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900 leading-tight break-words">{job.title}</h2>
+                                            <p className="text-lg sm:text-2xl text-gray-500 font-medium mt-1 break-words">{job.company}</p>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <button
@@ -160,17 +159,17 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
 
                                 <div className="p-4 sm:p-6 lg:p-8">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-50 rounded-2xl mb-8 border border-gray-100">
-                                        <div className="space-y-1">
+                                        <div className="space-y-1 min-w-0">
                                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Location</p>
-                                            <p className="text-gray-900 font-semibold">{job.location || "Remote / Not specified"}</p>
+                                            <p className="text-gray-900 font-semibold break-words">{job.location || "Remote / Not specified"}</p>
                                         </div>
-                                        <div className="space-y-1">
+                                        <div className="space-y-1 min-w-0">
                                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Salary Range</p>
-                                            <p className="text-gray-900 font-semibold">{job.salary || "Not disclosed"}</p>
+                                            <p className="text-gray-900 font-semibold break-words">{job.salary || "Not disclosed"}</p>
                                         </div>
-                                        <div className="space-y-1">
+                                        <div className="space-y-1 min-w-0">
                                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Job Type</p>
-                                            <p className="text-gray-900 font-semibold">{job.type?.replace("_", " ") || "Full Time"}</p>
+                                            <p className="text-gray-900 font-semibold break-words">{job.type?.replace("_", " ") || "Full Time"}</p>
                                         </div>
                                     </div>
 

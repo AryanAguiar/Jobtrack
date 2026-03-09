@@ -8,13 +8,13 @@ import { Autocomplete, TextField } from "@mui/material";
 import { toast } from "sonner";
 
 const validationSchema = Yup.object({
-    title: Yup.string().required("Title is required"),
-    company: Yup.string().required("Company is required"),
-    location: Yup.string().required("Location is required"),
+    title: Yup.string().max(200, "Title must be 200 characters or less").required("Title is required"),
+    company: Yup.string().max(100, "Company must be 100 characters or less").required("Company is required"),
+    location: Yup.string().max(250, "Location must be 250 characters or less").required("Location is required"),
     description: Yup.string().required("Description is required"),
     requirements: Yup.string().required("Requirements is required"),
     responsibilities: Yup.string().required("Responsibilities is required"),
-    salary: Yup.string(),
+    salary: Yup.number().typeError("Salary must be a number").nullable().transform((v, o) => o === "" ? null : v),
     type: Yup.string().required("Type is required"),
     status: Yup.string().required("Status is required"),
 });
@@ -35,22 +35,36 @@ const jobStatusOptions = [
     { label: "Withdrawn", value: "WITHDRAWN" }
 ];
 
-const FormField = ({ label, name, type = "text", placeholder, icon: Icon, as }: { label: string, name: string, type?: string, placeholder?: string, icon?: any, as?: string }) => (
+const FormField = ({ label, name, type = "text", placeholder, icon: Icon, as, maxLength }: { label: string, name: string, type?: string, placeholder?: string, icon?: any, as?: string, maxLength?: number }) => (
     <div className="flex flex-col gap-1.5">
         <label htmlFor={name} className="text-sm font-semibold text-gray-700 flex items-center gap-2">
             {Icon && <Icon className="text-blue-500 w-4 h-4" />}
             {label}
         </label>
         <div className="relative">
-            <Field
-                name={name}
-                type={as ? undefined : type}
-                as={as}
-                placeholder={placeholder}
-                className={`w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-gray-900 placeholder:text-gray-400 ${as === 'textarea' ? 'min-h-[120px] resize-y' : ''}`}
-            />
+            <Field name={name}>
+                {({ field }: any) => (
+                    <>
+                        <input
+                            {...field}
+                            type={as ? undefined : type}
+                            as={as}
+                            maxLength={maxLength}
+                            placeholder={placeholder}
+                            className={`w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none text-gray-900 placeholder:text-gray-400 ${as === 'textarea' ? 'min-h-[120px] resize-y' : ''}`}
+                        />
+                        <div className="flex justify-between items-start mt-1.5 min-h-[18px]">
+                            <ErrorMessage name={name} component="p" className="text-xs font-medium text-red-500" />
+                            {maxLength && (
+                                <span className="text-xs font-medium text-gray-400 ml-auto pl-2 shrink-0">
+                                    {maxLength - (field.value?.length || 0)} characters left
+                                </span>
+                            )}
+                        </div>
+                    </>
+                )}
+            </Field>
         </div>
-        <ErrorMessage name={name} component="p" className="text-xs font-medium text-red-500 mt-0.5" />
     </div>
 );
 
@@ -116,12 +130,14 @@ export default function JobForm({ isModal = false, onSuccess, onClose }: { isMod
                                     name="title"
                                     placeholder="e.g. Senior Frontend Developer"
                                     icon={HiOutlineBriefcase}
+                                    maxLength={100}
                                 />
                                 <FormField
                                     label="Company"
                                     name="company"
                                     placeholder="e.g. TechCorp Solutions"
                                     icon={HiOutlineOfficeBuilding}
+                                    maxLength={100}
                                 />
                             </div>
 
@@ -131,11 +147,13 @@ export default function JobForm({ isModal = false, onSuccess, onClose }: { isMod
                                     name="location"
                                     placeholder="e.g. Remote / NY"
                                     icon={HiOutlineLocationMarker}
+                                    maxLength={100}
                                 />
                                 <FormField
-                                    label="Salary"
+                                    label="Salary (Numeric)"
                                     name="salary"
-                                    placeholder="Enter salary"
+                                    type="number"
+                                    placeholder="e.g. 120000"
                                     icon={HiOutlineCash}
                                 />
                                 <div className="grid grid-cols-2 gap-2">
@@ -312,12 +330,14 @@ export default function JobForm({ isModal = false, onSuccess, onClose }: { isMod
                                     name="title"
                                     placeholder="e.g. Senior Frontend Developer"
                                     icon={HiOutlineBriefcase}
+                                    maxLength={100}
                                 />
                                 <FormField
                                     label="Company"
                                     name="company"
                                     placeholder="e.g. TechCorp Solutions"
                                     icon={HiOutlineOfficeBuilding}
+                                    maxLength={100}
                                 />
                             </div>
 
@@ -327,11 +347,13 @@ export default function JobForm({ isModal = false, onSuccess, onClose }: { isMod
                                     name="location"
                                     placeholder="e.g. Remote / New York, NY"
                                     icon={HiOutlineLocationMarker}
+                                    maxLength={100}
                                 />
                                 <FormField
-                                    label="Salary (Optional)"
+                                    label="Salary (Numeric Optional)"
                                     name="salary"
-                                    placeholder="e.g. $120k - $150k"
+                                    type="number"
+                                    placeholder="e.g. 120000"
                                     icon={HiOutlineCash}
                                 />
                                 <div className="grid grid-cols-2 gap-4">

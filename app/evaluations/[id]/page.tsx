@@ -3,10 +3,10 @@
 import { useEffect, useState, use } from "react";
 import { AnalysisType } from "@/utils/types";
 import Navbar from "../../components/Navbar";
-import Link from "next/link";
 import { HiArrowLeft } from "react-icons/hi2";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Timer from "@/app/components/Timer";
 
 export default function AnalysisDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -62,7 +62,7 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                         });
                         if (!res.ok) throw new Error("Failed to delete evaluation");
                         toast.success("Evaluation deleted successfully");
-                        router.push('/evaluations');
+                        router.back();
                     } catch (error) {
                         setError(error instanceof Error ? error.message : "Failed to delete evaluation");
                         toast.error("Failed to delete evaluation");
@@ -86,13 +86,13 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                 <Navbar userName={user?.name || "Loading..."} />
 
                 <div className="mt-8">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors mb-6 group"
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group cursor-pointer"
                     >
                         <HiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform" />
-                        Back to Dashboard
-                    </Link>
+                        Go Back
+                    </button>
 
                     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {loading ? (
@@ -112,8 +112,8 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                                 {/* Header Section */}
                                 <div className="p-4 sm:p-6 lg:p-12 bg-gradient-to-br from-white to-gray-50/50">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                        <div>
-                                            <h1 className="text-xl sm:text-2xl lg:text-4xl font-extrabold text-gray-900 leading-tight">
+                                        <div className="min-w-0 flex-1">
+                                            <h1 className="text-xl sm:text-2xl lg:text-4xl font-extrabold text-gray-900 leading-tight break-words block">
                                                 {analysis.resumeTitle} <span className="text-blue-200 mx-2">/</span> {analysis.jobTitle}
                                             </h1>
                                             <div className="flex items-center gap-4 mt-4">
@@ -127,6 +127,9 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                                                         day: 'numeric'
                                                     })}
                                                 </span>
+                                                <div className="flex items-center gap-2 border-l border-gray-200 pl-4 ml-4">
+                                                    <Timer expiryDate={analysis.resumeExpiry} />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
@@ -146,7 +149,8 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                                     </div>
                                 </div>
 
-                                {/* Main Content Section */}
+
+                                {/* Main Content */}
                                 <div className="p-4 sm:p-6 lg:p-12 space-y-12">
                                     {/* Summary Section */}
                                     <section>
@@ -168,9 +172,9 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                                             </h3>
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 {[
-                                                    { label: 'Skills Match', value: analysis.breakdown.skills, color: 'text-blue-600', bg: 'bg-blue-50' },
-                                                    { label: 'Education', value: analysis.breakdown.education, color: 'text-purple-600', bg: 'bg-purple-50' },
-                                                    { label: 'Experience', value: analysis.breakdown.experience, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+                                                    { label: 'Skills Match', value: analysis.breakdown.skills, color: 'text-blue-600', barColor: 'bg-blue-600' },
+                                                    { label: 'Education', value: analysis.breakdown.education, color: 'text-purple-600', barColor: 'bg-purple-600' },
+                                                    { label: 'Experience', value: analysis.breakdown.experience, color: 'text-emerald-600', barColor: 'bg-emerald-600' }
                                                 ].map((item, idx) => (
                                                     <div key={idx} className="bg-white border border-gray-100 p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
                                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{item.label}</p>
@@ -179,7 +183,7 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                                                         </div>
                                                         <div className="mt-4 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                                                             <div
-                                                                className={`h-full rounded-full ${item.color.replace('text', 'bg')}`}
+                                                                className={`h-full rounded-full ${item.barColor}`}
                                                                 style={{ width: `${item.value}%` }}
                                                             ></div>
                                                         </div>

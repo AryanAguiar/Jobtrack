@@ -27,7 +27,7 @@ export const registerLimiter = new RateLimiterRedis({
 export const resumeUploadLimiter = new RateLimiterRedis({
     storeClient: client,
     keyPrefix: "resume-upload",
-    points: 20,
+    points: 200000,
     duration: 86400,
     blockDuration: 86400,
 })

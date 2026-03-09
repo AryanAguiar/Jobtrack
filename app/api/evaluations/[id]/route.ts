@@ -3,7 +3,7 @@ import { getEvaluationById, deleteEvaluation } from "@/services/evaluations.serv
 import { ServiceError } from "@/utils/helpers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const user = await getAuthUser(request);
     if (!user) {
         return NextResponse.json({ message: "Unauthorized session" }, { status: 401 });
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const user = await getAuthUser(request);
     if (!user) {
         return NextResponse.json({ message: "Unauthorized session" }, { status: 401 });

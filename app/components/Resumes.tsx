@@ -4,7 +4,7 @@ import { IoAddCircleOutline } from "react-icons/io5";
 import { HiOutlineDocumentText, HiOutlineCalendar } from "react-icons/hi";
 import Link from "next/link";
 import UploadResumeModal from "./UploadResumeModal";
-
+import Timer from "./Timer";
 
 const Resumes: FC<ResumesProps> = ({ id }) => {
     const [data, setData] = useState<ResumeType[]>([]);
@@ -71,17 +71,23 @@ const Resumes: FC<ResumesProps> = ({ id }) => {
 
                         <div className="flex flex-col gap-4">
                             {data.slice(0, 4).map((resume) => (
-                                <Link key={resume.id} href={`/resumes/${resume.id}`}>
+                                <Link key={resume.id} href={`/resumes/${resume.id}`} className="block">
                                     <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all group cursor-pointer relative">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <div className="p-3 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                                        <div className="flex items-start justify-between min-w-0">
+                                            <div className="flex items-center gap-4 min-w-0 w-full">
+                                                <div className="p-3 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0">
                                                     <HiOutlineDocumentText className="text-2xl" />
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h2 className="text-sm font-bold text-gray-900 truncate pr-10">
-                                                        {resume.title}
-                                                    </h2>
+                                                <div className="flex-1 min-w-0 w-full">
+                                                    <div className="flex items-start justify-between gap-2 min-w-0 w-full">
+                                                        <h2 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate overflow-hidden whitespace-nowrap flex-1 min-w-0">
+                                                            {resume.title}
+                                                        </h2>
+                                                        <div className="flex items-center shrink-0">
+                                                            <Timer expiryDate={resume.expiresAt} />
+                                                        </div>
+                                                    </div>
+
                                                     <div className="flex items-center mt-1 text-xs text-gray-500">
                                                         <HiOutlineCalendar className="mr-1.5" />
                                                         <span>{new Date(resume.createdAt).toLocaleDateString()}</span>

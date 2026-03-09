@@ -12,23 +12,22 @@ interface ParsedResult {
     isResume: boolean;
 }
 
-async function extractText(filePath: string): Promise<string> {
-    const ext = path.extname(filePath).toLowerCase();
-    const dataBuffer = fs.readFileSync(filePath);
+async function extractText(buffer: Buffer, fileName: string): Promise<string> {
+    const ext = path.extname(fileName).toLowerCase();
 
     if (ext === '.pdf') {
-        const pdfData = await pdf(dataBuffer);
+        const pdfData = await pdf(buffer);
         return pdfData.text;
     } else if (ext === '.docx' || ext === '.doc') {
-        const result = await mammoth.extractRawText({ buffer: dataBuffer });
+        const result = await mammoth.extractRawText({ buffer: buffer });
         return result.value;
     } else {
         throw new Error(`Unsupported file type: ${ext}`);
     }
 }
 
-export async function parsePdf(filePath: string): Promise<ParsedResult> {
-    const text = await extractText(filePath);
+export async function parsePdf(buffer: Buffer, fileName: string): Promise<ParsedResult> {
+    const text = await extractText(buffer, fileName);
 
     const lowerText = text.toLowerCase();
     const keywords: string[] = [];

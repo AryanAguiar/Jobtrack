@@ -8,6 +8,8 @@ import Navbar from "../components/Navbar";
 import { Autocomplete, TextField } from "@mui/material";
 import AnalyzeResumeForJob from "../components/AnalyzeResumeForJob";
 import { toast } from "sonner";
+import Timer from "../components/Timer";
+import { useRouter } from "next/navigation";
 
 const sortOptions = [
     { label: "Date", value: "createdAt" },
@@ -15,6 +17,7 @@ const sortOptions = [
 ];
 
 export default function Evaluations() {
+    const router = useRouter();
     const [data, setData] = useState<AnalysisType[]>([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
@@ -134,13 +137,13 @@ export default function Evaluations() {
                 <Navbar userName={user?.name || "Loading..."} />
 
                 <div className="mt-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group"
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group cursor-pointer"
                     >
                         <HiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform" />
-                        Back to Dashboard
-                    </Link>
+                        Go Back
+                    </button>
 
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
                         <h1 className="text-2xl font-bold text-gray-900">All Evaluations</h1>
@@ -246,7 +249,7 @@ export default function Evaluations() {
                                                         </p>
                                                     </div>
                                                     <button
-                                                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                                        className="p-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
                                                         title="Delete Evaluation"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -272,15 +275,21 @@ export default function Evaluations() {
                                                     &quot;{analysis.summary}&quot;
                                                 </div>
                                             </div>
+                                            <br />
+                                            <div className="mt-4 flex items-center justify-between">
+                                                <Timer expiryDate={analysis.resumeExpiry} />
+                                            </div>
 
                                             <div className="mt-6 pt-5 border-t border-gray-50 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
-                                                <div className="flex items-center gap-2 text-gray-400">
-                                                    <HiOutlineCalendar className="text-base" />
-                                                    {new Date(analysis.createdAt).toLocaleDateString(undefined, {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        year: 'numeric'
-                                                    })}
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                                    <div className="flex items-center gap-2 text-gray-400">
+                                                        <HiOutlineCalendar className="text-base" />
+                                                        {new Date(analysis.createdAt).toLocaleDateString(undefined, {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </div>
                                                 </div>
                                                 <span className="text-blue-600 group-hover:underline">View Report →</span>
                                             </div>

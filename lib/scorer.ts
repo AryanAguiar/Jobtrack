@@ -53,6 +53,9 @@ function skillsMatch(required: string, candidate: string): boolean {
     const reqNorm = normalizeSkill(required);
     const candNorm = normalizeSkill(candidate);
 
+    // Prevent empty string matches
+    if (!reqNorm || !candNorm) return false;
+
     // Direct match
     if (reqNorm === candNorm) return true;
 
@@ -110,10 +113,12 @@ export function calculateScore(input: ScoreInput): ScoreBreakdown {
 
         if (reqLevel === 0 || candLevel === 0) {
 
-            if (reqNorm === candNorm) {
+            if (reqNorm === candNorm && reqNorm !== "") {
                 educationScore = 100;
-            } else if (candNorm.includes(reqNorm) || reqNorm.includes(candNorm)) {
+            } else if (candNorm && reqNorm && (candNorm.includes(reqNorm) || reqNorm.includes(candNorm))) {
                 educationScore = 85;
+            } else if (candNorm === "" && reqNorm !== "") {
+                educationScore = 0;
             } else {
                 educationScore = 50;
             }
@@ -124,8 +129,8 @@ export function calculateScore(input: ScoreInput): ScoreBreakdown {
         } else {
             educationScore = 40;
         }
-    } else {
-        educationScore = 100;
+    } else if (!requiredEducation) {
+        educationScore = candidateEducation ? 100 : 0;
     }
 
     const finalScore = (skillScore * WEIGHTS.skills) + (experienceScore * WEIGHTS.experience) + (educationScore * WEIGHTS.education);

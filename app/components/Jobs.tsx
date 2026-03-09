@@ -71,32 +71,32 @@ const Jobs: FC<JobsProps> = ({ id }) => {
                     ) : (
                         <div className="flex flex-col gap-4">
                             {data.slice(0, 4).map((job) => (
-                                <Link key={job.id} href={`/jobs/${job.id}`}>
+                                <Link key={job.id} href={`/jobs/${job.id}`} className="block">
                                     <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all group cursor-pointer relative">
-                                        <div className="flex items-start justify-between">
-                                            <h2 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors pr-12 truncate">
+                                        <div className="flex items-start justify-between gap-2 min-w-0 w-full">
+                                            <h2 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate overflow-hidden whitespace-nowrap flex-1 min-w-0">
                                                 {job.title}
                                             </h2>
-                                            <div className="flex flex-col items-end gap-1">
+                                            <div className="flex flex-col items-end gap-1 shrink-0">
                                                 <span className="text-[10px] uppercase tracking-wider font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
                                                     {job.status}
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <div className="mt-3 space-y-2">
-                                            <div className="flex items-center text-sm text-gray-600">
+                                        <div className="mt-3 space-y-2 min-w-0">
+                                            <div className="flex items-center text-sm text-gray-600 min-w-0">
                                                 <HiOutlineBriefcase className="mr-2 text-gray-400 shrink-0" />
-                                                <span className="font-medium">{job.company}</span>
+                                                <span className="font-medium truncate block">{job.company}</span>
                                             </div>
-                                            <div className="flex items-center text-sm text-gray-500">
+                                            <div className="flex items-center text-sm text-gray-500 min-w-0">
                                                 <HiOutlineLocationMarker className="mr-2 text-gray-400 shrink-0" />
-                                                <span>{job.location}</span>
+                                                <span className="truncate block">{job.location}</span>
                                             </div>
                                             {job.salary && (
-                                                <div className="flex items-center text-sm text-gray-500">
+                                                <div className="flex items-center text-sm text-gray-500 min-w-0">
                                                     <HiOutlineCurrencyDollar className="mr-2 text-gray-400 shrink-0" />
-                                                    <span>{job.salary}</span>
+                                                    <span className="truncate block">{job.salary}</span>
                                                 </div>
                                             )}
                                         </div>

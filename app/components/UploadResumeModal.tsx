@@ -7,7 +7,7 @@ import { FiPlus, FiFile, FiX } from "react-icons/fi";
 import { toast } from "sonner";
 
 const validationSchema = Yup.object({
-    title: Yup.string().required("Title is required"),
+    title: Yup.string().max(150, "Title must be 150 characters or less").required("Title is required"),
     file: Yup.mixed().required("File is required"),
 });
 
@@ -76,14 +76,20 @@ export default function UploadResumeModal({ isModal = false, onSuccess, onClose 
                                 id="title"
                                 type="text"
                                 name="title"
+                                maxLength={150}
                                 value={values.title}
                                 onChange={(e) => setFieldValue("title", e.target.value)}
                                 placeholder="e.g. Software Engineer Resume 2024"
                                 className={`w-full px-4 py-2 rounded-xl border ${touched.title && errors.title ? 'border-red-500' : 'border-gray-200'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
                             />
-                            {touched.title && errors.title && (
-                                <p className="mt-1 text-xs text-red-500">{errors.title}</p>
-                            )}
+                            <div className="flex justify-between items-start mt-1 min-h-[18px]">
+                                {touched.title && errors.title ? (
+                                    <p className="text-xs text-red-500">{errors.title}</p>
+                                ) : <div />}
+                                <span className="text-xs font-medium text-gray-400 ml-auto pl-2 shrink-0">
+                                    {150 - (values.title?.length || 0)} characters left
+                                </span>
+                            </div>
                         </div>
 
                         <div
@@ -181,7 +187,7 @@ export default function UploadResumeModal({ isModal = false, onSuccess, onClose 
                                         Uploading...
                                     </>
                                 ) : (
-                                    "Finish Upload"
+                                    "Upload"
                                 )}
                             </button>
                         </div>

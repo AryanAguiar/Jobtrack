@@ -34,14 +34,22 @@ This project is my way of learning the stack deeply by building something comple
 
 ## Installation:
 npm install
+npx prisma generate
 npm run dev
+
 
 ## Create a .env file:
 DATABASE_URL=your_database_url
-GROQ_API_KEY=your_api_key
+GROQ_API_KEY='your_key'
+UPSTASH_REDIS_REST_URL='your_redis_url'
+UPSTASH_REDIS_REST_TOKEN='your_key'
+REDIS_URL='your_redis_url'
+JWT_SECRET='your_key'
+NEXT_PUBLIC_SUPABASE_URL='your_key'
+SUPABASE_SERVICE_KEY='your_key'
 
 Server Runs On:
 http://localhost:3000
 
 ## Future Improvements:
-- Have to add resume storing facility
+- Improve and fix search functionality

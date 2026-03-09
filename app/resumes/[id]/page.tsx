@@ -6,6 +6,7 @@ import { use, useEffect, useState } from "react";
 import { HiOutlineDocumentText, HiOutlineCalendar, HiOutlineHashtag, HiOutlineLightBulb, HiOutlineExclamationCircle, HiArrowLeft } from "react-icons/hi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Timer from "@/app/components/Timer";
 
 export default function ResumePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -81,7 +82,7 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                         });
                         if (!res.ok) throw new Error("Failed to delete resume");
                         toast.success("Resume deleted successfully");
-                        router.push('/dashboard'); // Changed to dashboard as /resumes might not exist or be the correct redirect
+                        router.back();
                     } catch (error) {
                         setError(error instanceof Error ? error.message : "Failed to delete resume");
                         toast.error("Failed to delete resume");
@@ -105,13 +106,13 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                 <Navbar userName={user?.name || "Loading..."} />
 
                 <div className="mt-8">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors mb-6 group"
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group cursor-pointer"
                     >
                         <HiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform" />
-                        Back to Dashboard
-                    </Link>
+                        Go Back
+                    </button>
                     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {loading ? (
                             <div className="p-10 sm:p-20 flex flex-col items-center justify-center">
@@ -128,20 +129,19 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                         ) : resume ? (
                             <>
 
-                                <div className="p-4 sm:p-6 lg:p-8 pb-0 flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-                                    <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl">
+                                <div className="p-4 sm:p-6 lg:p-8 pb-0 flex flex-col sm:flex-row items-start gap-4 sm:gap-5 min-w-0">
+                                    <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl shrink-0">
                                         <HiOutlineDocumentText className="text-4xl" />
                                     </div>
-                                    <div>
-                                        <h2 className="text-xl sm:text-3xl font-extrabold text-gray-900 leading-tight">{resume.title}</h2>
+                                    <div className="min-w-0 w-full">
+                                        <h2 className="text-xl sm:text-3xl font-extrabold text-gray-900 leading-tight break-words block">{resume.title}</h2>
                                         <div className="flex flex-wrap items-center mt-2 text-sm text-gray-500 gap-2 sm:gap-4">
                                             <div className="flex items-center">
                                                 <HiOutlineCalendar className="mr-1.5" />
                                                 <span>Uploaded {new Date(resume.createdAt).toLocaleDateString()}</span>
                                             </div>
                                             <div className="flex items-center">
-                                                <HiOutlineHashtag className="mr-1.5" />
-                                                <span>{resume.fileName}</span>
+                                                <Timer expiryDate={resume.expiresAt} />
                                             </div>
                                         </div>
                                     </div>
@@ -169,7 +169,7 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                                             rel="noopener noreferrer"
                                             className="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200"
                                         >
-                                            Download PDF
+                                            Download
                                         </a>
                                     </div>
                                 </div>

@@ -7,25 +7,27 @@ export default async function middleware(request: NextRequest) {
     const isAuthPage = pathname === "/login" || pathname === "/signup";
     const isDashboardPage = pathname.startsWith("/dashboard");
 
-    if (!token && isDashboardPage) {
-        return NextResponse.redirect(new URL("/login", request.url));
-    }
-
-    if (token && isAuthPage) {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-
-    if (token) {
-        try {
-            const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-            await jwtVerify(token, secret);
-            return NextResponse.next();
-        } catch (error) {
+    if (!token) {
+        if (isDashboardPage) {
             return NextResponse.redirect(new URL("/login", request.url));
         }
+        return NextResponse.next();
     }
 
-    return NextResponse.next();
+    try {
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+        await jwtVerify(token, secret);
+        if (isAuthPage) {
+            return NextResponse.redirect(new URL("/dashboard", request.url));
+        }
+        return NextResponse.next();
+    } catch (error) {
+        const response = isDashboardPage
+            ? NextResponse.redirect(new URL("/login", request.url))
+            : NextResponse.next();
+        response.cookies.delete("token");
+        return response;
+    }
 }
 
 export const config = {

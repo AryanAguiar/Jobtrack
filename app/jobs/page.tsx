@@ -7,6 +7,7 @@ import Navbar from "../components/Navbar";
 import { Autocomplete, TextField } from "@mui/material";
 import JobForm from "../components/JobForm";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const sortOptions = [
     { label: "Date", value: "createdAt" },
@@ -15,6 +16,7 @@ const sortOptions = [
 ];
 
 export default function JobsPage() {
+    const router = useRouter();
     const [data, setData] = useState<JobType[]>([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
@@ -143,13 +145,13 @@ export default function JobsPage() {
                 <Navbar userName={user?.name || "Loading..."} />
 
                 <div className="mt-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group"
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group cursor-pointer"
                     >
                         <HiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform" />
-                        Back to Dashboard
-                    </Link>
+                        Go Back
+                    </button>
 
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
                         <h1 className="text-2xl font-bold text-gray-900">All Jobs</h1>
@@ -257,7 +259,7 @@ export default function JobsPage() {
                                                         </span>
                                                     </div>
                                                     <button
-                                                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                                        className="p-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
                                                         title="Delete Job"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -270,23 +272,24 @@ export default function JobsPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="flex-1">
-                                                <h2 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                                            <div className="flex-1 min-w-0">
+                                                <h2 className="text-lg font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
                                                     {job.title}
                                                 </h2>
-                                                <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
-                                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                    At: <span className="font-semibold text-gray-700">{job.company}</span>
+                                                <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 min-w-0">
+                                                    <span className="w-1 h-1 bg-gray-300 rounded-full shrink-0"></span>
+                                                    <span className="shrink-0">At:</span>
+                                                    <span className="font-semibold text-gray-700 truncate">{job.company}</span>
                                                 </p>
 
-                                                <div className="mt-4 space-y-2">
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                        <HiOutlineMapPin className="text-base text-gray-400" />
-                                                        {job.location}
+                                                <div className="mt-4 space-y-2 min-w-0">
+                                                    <div className="flex items-center gap-2 text-xs text-gray-500 min-w-0">
+                                                        <HiOutlineMapPin className="text-base text-gray-400 shrink-0" />
+                                                        <span className="truncate">{job.location}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                        <HiOutlineCurrencyDollar className="text-base text-gray-400" />
-                                                        {job.salary || "Not specified"}
+                                                    <div className="flex items-center gap-2 text-xs text-gray-500 min-w-0">
+                                                        <HiOutlineCurrencyDollar className="text-base text-gray-400 shrink-0" />
+                                                        <span className="truncate">{job.salary || "Not specified"}</span>
                                                     </div>
                                                 </div>
 

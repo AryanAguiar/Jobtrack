@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import { IoAddCircleOutline } from "react-icons/io5";
 import AnalyzeResumeForJob from "./AnalyzeResumeForJob";
+import Timer from "./Timer";
 
 
 const Analysis: FC<AnalysisProps> = ({ id }) => {
@@ -78,24 +79,24 @@ const Analysis: FC<AnalysisProps> = ({ id }) => {
                     ) : (
                         <div className="grid grid-cols-1 gap-6">
                             {data.slice(0, 4).map((analysis) => (
-                                <Link key={analysis.id} href={`/evaluations/${analysis.id}`}>
+                                <Link key={analysis.id} href={`/evaluations/${analysis.id}`} className="block">
                                     <div className="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition group relative">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex-1">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h2 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors pr-10 truncate">
+                                        <div className="flex justify-between items-start mb-4 gap-4 min-w-0">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-start gap-2 mb-2 min-w-0">
+                                                    <h2 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors truncate flex-1 min-w-0">
                                                         {analysis.resumeTitle}
                                                     </h2>
-
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                                                    <div className="flex items-center gap-3 shrink-0">
+                                                        <Timer expiryDate={analysis.resumeExpiry} />
+                                                        <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">
                                                             Match: {Math.round(analysis.matchScore)}%
                                                         </span>
                                                     </div>
                                                 </div>
 
 
-                                                <p className="text-sm text-gray-500 mt-1">
+                                                <p className="text-sm text-gray-500 mt-1 truncate w-full">
                                                     Evaluated for:{" "}
                                                     <span className="font-medium text-gray-700">
                                                         {analysis.jobTitle}
