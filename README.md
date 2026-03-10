@@ -52,4 +52,4 @@ Server Runs On:
 http://localhost:3000
 
 ## Future Improvements:
-- Improve and fix search functionality
+- Nothing new yet

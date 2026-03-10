@@ -14,7 +14,10 @@ export async function GET(request: Request) {
 
         const page = Number(searchParams.get("page")) || 1;
         const limit = Number(searchParams.get("limit")) || 10;
-        const resumes = await getUserResumes(user.id, page, limit);
+        const search = searchParams.get("search") || undefined;
+        const sortKey = searchParams.get("sortKey") || "createdAt";
+        const sortOrder = (searchParams.get("sortOrder") as "asc" | "desc") || "desc";
+        const resumes = await getUserResumes(user.id, page, limit, search, sortKey as "createdAt" | "title", sortOrder);
         return NextResponse.json(resumes, { status: 200 });
     } catch (error) {
         if (error instanceof ServiceError) {

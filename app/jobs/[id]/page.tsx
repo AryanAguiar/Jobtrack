@@ -2,10 +2,11 @@
 
 import Navbar from "@/app/components/Navbar";
 import { JobType } from "@/utils/types";
-import { use, useEffect, useState } from "react";
-import { HiArrowLeft } from "react-icons/hi";
+import { use, useEffect, useState, useCallback } from "react";
+import { HiArrowLeft, HiX } from "react-icons/hi";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import JobForm from "@/app/components/JobForm";
 
 export default function JobPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -13,52 +14,50 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const router = useRouter();
 
+    const fetchUser = useCallback(async () => {
+        try {
+            const res = await fetch("/api/auth/me");
+            if (res.ok) {
+                const data = await res.json();
+                setUser(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch user", error);
+        }
+    }, []);
+
+    const fetchJob = useCallback(async () => {
+        try {
+            const res = await fetch(`/api/jobs/${id}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!res.ok) throw new Error("Failed to fetch job");
+
+            const result = await res.json();
+            setJob(result);
+            setLoading(false);
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to fetch job"
+            );
+            setLoading(false);
+        }
+    }, [id]);
+
     useEffect(() => {
-
-        const fetchUser = async () => {
-            try {
-                const res = await fetch("/api/auth/me");
-                if (res.ok) {
-                    const data = await res.json();
-                    setUser(data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch user", error);
-            }
-        };
-
-
-        const fetchJob = async () => {
-            try {
-                const res = await fetch(`/api/jobs/${id}`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                });
-
-                if (!res.ok) throw new Error("Failed to fetch job");
-
-                const result = await res.json();
-                setJob(result);
-                setLoading(false);
-            } catch (error) {
-                setError(
-                    error instanceof Error
-                        ? error.message
-                        : "Failed to fetch job"
-                );
-                setLoading(false);
-            }
-        };
-
-
         fetchUser();
         if (id) {
             setLoading(true);
             fetchJob();
         }
-    }, [id]);
+    }, [id, fetchUser, fetchJob]);
 
     const deleteJob = async () => {
         toast('Are you sure you want to delete this job?', {
@@ -137,6 +136,12 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                                             <p className="text-lg sm:text-2xl text-gray-500 font-medium mt-1 break-words">{job.company}</p>
                                         </div>
                                         <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => setIsEditModalOpen(true)}
+                                                className="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all text-sm"
+                                            >
+                                                Edit
+                                            </button>
                                             <button
                                                 onClick={deleteJob}
                                                 className="inline-flex items-center justify-center px-6 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all text-sm"
@@ -235,6 +240,35 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                     </div>
                 </div>
             </div>
+
+            {/* Edit Modal */}
+            {isEditModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-300">
+                        <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-gray-900">Edit Job Opportunity</h2>
+                            <button
+                                onClick={() => setIsEditModalOpen(false)}
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <HiX className="text-xl text-gray-500" />
+                            </button>
+                        </div>
+                        <div className="p-4 md:p-8">
+                            <JobForm
+                                isModal={true}
+                                initialData={job}
+                                jobId={id}
+                                onClose={() => setIsEditModalOpen(false)}
+                                onSuccess={() => {
+                                    setIsEditModalOpen(false);
+                                    fetchJob();
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

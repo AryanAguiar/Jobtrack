@@ -147,6 +147,9 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                                             </button>
                                         </div>
                                     </div>
+                                    <div className="text-xs text-red-500 mt-5">
+                                        AI-generated evaluation. Results may contain inaccuracies.
+                                    </div>
                                 </div>
 
 
@@ -170,11 +173,12 @@ export default function AnalysisDetail({ params }: { params: Promise<{ id: strin
                                                 <span className="w-1.5 h-8 bg-green-600 rounded-full"></span>
                                                 Score Breakdown
                                             </h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                                 {[
                                                     { label: 'Skills Match', value: analysis.breakdown.skills, color: 'text-blue-600', barColor: 'bg-blue-600' },
                                                     { label: 'Education', value: analysis.breakdown.education, color: 'text-purple-600', barColor: 'bg-purple-600' },
-                                                    { label: 'Experience', value: analysis.breakdown.experience, color: 'text-emerald-600', barColor: 'bg-emerald-600' }
+                                                    { label: 'Experience', value: analysis.breakdown.experience, color: 'text-emerald-600', barColor: 'bg-emerald-600' },
+                                                    { label: 'Role Match', value: analysis.breakdown.role ?? 0, color: 'text-amber-600', barColor: 'bg-amber-600' }
                                                 ].map((item, idx) => (
                                                     <div key={idx} className="bg-white border border-gray-100 p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
                                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{item.label}</p>

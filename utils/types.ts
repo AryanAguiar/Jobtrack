@@ -22,6 +22,8 @@ export interface ScoreInput {
     candidateYears: number
     requiredEducation: string
     candidateEducation: string
+    jobRole: string
+    candidateRole: string
 }
 
 export interface ScoreBreakdown {
@@ -30,6 +32,7 @@ export interface ScoreBreakdown {
         skills: number
         experience: number
         education: number
+        role: number
     }
 }
 
@@ -59,6 +62,7 @@ export interface AnalysisType {
         skills: number
         experience: number
         education: number
+        role: number
     };
     parsedData: {
         skills: string[];

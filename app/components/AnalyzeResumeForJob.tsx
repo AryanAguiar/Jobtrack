@@ -107,6 +107,18 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                         value={selectedResume}
                         onChange={(_, newValue) => setSelectedResume(newValue)}
                         disabled={fetching || loading}
+                        sx={{
+                            width: "100%",
+                            "& .MuiAutocomplete-paper": {
+                                maxWidth: "100%",
+                            }
+                        }}
+                        ListboxProps={{
+                            sx: {
+                                maxHeight: 280,
+                                overflowY: "auto"
+                            }
+                        }}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -116,7 +128,7 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                     ...params.InputProps,
                                     endAdornment: (
                                         <>
-                                            {fetching ? <CircularProgress color="inherit" size={20} /> : null}
+                                            {fetching ? <CircularProgress size={20} /> : null}
                                             {params.InputProps.endAdornment}
                                         </>
                                     ),
@@ -125,19 +137,59 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: '12px',
                                         backgroundColor: '#f9fafb',
+
                                         '& fieldset': { borderColor: '#e5e7eb' },
                                         '&:hover fieldset': { borderColor: '#d1d5db' },
-                                        '&.Mui-focused fieldset': { borderColor: '#10b981', borderWidth: '2px' },
-                                    },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#10b981',
+                                            borderWidth: '2px'
+                                        },
+                                    }
                                 }}
                             />
                         )}
                         renderOption={(props, option) => {
                             const { key, ...optionProps } = props;
+
                             return (
-                                <Box component="li" key={key} {...optionProps} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', py: 1 }}>
-                                    <Typography variant="body2" fontWeight="medium">{option.title}</Typography>
-                                    <Typography variant="caption" color="text.secondary">{option.fileName}</Typography>
+                                <Box
+                                    component="li"
+                                    key={key}
+                                    {...optionProps}
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "flex-start",
+                                        py: 1,
+                                        maxWidth: "100%",
+                                        overflow: "hidden"
+                                    }}
+                                >
+                                    <Typography
+                                        variant="body2"
+                                        fontWeight="600"
+                                        sx={{
+                                            width: "100%",
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }}
+                                    >
+                                        {option.title}
+                                    </Typography>
+
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        sx={{
+                                            width: "100%",
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis"
+                                        }}
+                                    >
+                                        {option.fileName}
+                                    </Typography>
                                 </Box>
                             );
                         }}
@@ -154,6 +206,18 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                         value={selectedJob}
                         onChange={(_, newValue) => setSelectedJob(newValue)}
                         disabled={fetching || loading}
+                        sx={{
+                            width: "100%",
+                            "& .MuiAutocomplete-paper": {
+                                maxWidth: "100%",
+                            }
+                        }}
+                        ListboxProps={{
+                            sx: {
+                                maxHeight: 280,
+                                overflowY: "auto"
+                            }
+                        }}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -163,28 +227,73 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                     ...params.InputProps,
                                     endAdornment: (
                                         <>
-                                            {fetching ? <CircularProgress color="inherit" size={20} /> : null}
+                                            {fetching ? (
+                                                <CircularProgress color="inherit" size={20} />
+                                            ) : null}
                                             {params.InputProps.endAdornment}
                                         </>
                                     ),
                                 }}
                                 sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: '12px',
-                                        backgroundColor: '#f9fafb',
-                                        '& fieldset': { borderColor: '#e5e7eb' },
-                                        '&:hover fieldset': { borderColor: '#d1d5db' },
-                                        '&.Mui-focused fieldset': { borderColor: '#10b981', borderWidth: '2px' },
+                                    "& .MuiOutlinedInput-root": {
+                                        borderRadius: "12px",
+                                        backgroundColor: "#f9fafb",
+
+                                        "& fieldset": { borderColor: "#e5e7eb" },
+                                        "&:hover fieldset": { borderColor: "#d1d5db" },
+                                        "&.Mui-focused fieldset": {
+                                            borderColor: "#10b981",
+                                            borderWidth: "2px",
+                                        },
                                     },
                                 }}
                             />
                         )}
                         renderOption={(props, option) => {
                             const { key, ...optionProps } = props;
+
                             return (
-                                <Box component="li" key={key} {...optionProps} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', py: 1 }}>
-                                    <Typography variant="body2" fontWeight="medium">{option.title}</Typography>
-                                    <Typography variant="caption" color="text.secondary">{option.company}</Typography>
+                                <Box
+                                    component="li"
+                                    key={key}
+                                    {...optionProps}
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "flex-start",
+                                        py: 1,
+                                        maxWidth: "100%",
+                                        overflow: "hidden",
+                                        "&:hover": {
+                                            backgroundColor: "#f3f4f6",
+                                        },
+                                    }}
+                                >
+                                    <Typography
+                                        variant="body2"
+                                        fontWeight="600"
+                                        sx={{
+                                            width: "100%",
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {option.title}
+                                    </Typography>
+
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                        sx={{
+                                            width: "100%",
+                                            whiteSpace: "nowrap",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                        }}
+                                    >
+                                        {option.company}
+                                    </Typography>
                                 </Box>
                             );
                         }}

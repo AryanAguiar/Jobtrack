@@ -13,7 +13,7 @@ export async function deleteExpiredResumes() {
 
     for (const resume of expiredResumes) {
         try {
-            await supaBase.storage.from('JobtrackResumes').remove([resume.filePath]);
+            await supaBase.storage.from('JobtrackResumes').remove([resume.fileName]);
 
             await prisma.resume.delete({
                 where: {

@@ -30,7 +30,39 @@ export async function evaluateResume(resumeText: string, jobText: string, userId
                 8. The "summary" should be 2-3 sentences explaining the overall fit.
                 9. "strengths" should list specific matching qualifications the candidate has.
                 10. "gaps" should list ONLY specific missing requirements — do NOT list a gap if the candidate has the skill or an equivalent/synonym.
+                11. Determine the PRIMARY job role category for both the job description and the candidate resume.
 
+                IMPORTANT:
+                The "requiredSkills" array must include EVERY technical skill, framework,
+                language, database, tool, or technology mentioned in the job description.
+
+                Examples:
+                Languages: javascript, python, java
+                Frameworks: react, angular, spring
+                Databases: mysql, postgresql, mongodb
+                DevOps: docker, kubernetes, aws, ci/cd
+                Tools: git, jira
+
+                Do NOT include soft skills like communication or teamwork.
+
+                Use ONLY one of the following standardized categories:
+
+                "software engineering"
+                "data science"
+                "sales"
+                "marketing"
+                "product management"
+                "design"
+                "finance"
+                "operations"
+                "customer support"
+                "human resources"
+                "other"
+
+                Return them as:
+                "jobRole"
+                "candidateRole"
+                
                 Return ONLY valid JSON matching this exact structure:
                 {
                   "requiredSkills": string[],
@@ -41,7 +73,9 @@ export async function evaluateResume(resumeText: string, jobText: string, userId
                   "candidateEducation": string,
                   "summary": string,
                   "strengths": string[],
-                  "gaps": string[]
+                  "gaps": string[],
+                  "jobRole": string,
+                  "candidateRole": string
                 }
 
                 RESUME:
@@ -97,6 +131,8 @@ export async function evaluateResume(resumeText: string, jobText: string, userId
             candidateYears: Number(parsed?.candidateYears ?? 0),
             requiredEducation: parsed?.requiredEducation ?? "",
             candidateEducation: parsed?.candidateEducation ?? "",
+            jobRole: parsed?.jobRole ?? "",
+            candidateRole: parsed?.candidateRole ?? "",
         }
 
         const { finalScore, breakdown } = calculateScore(scoringInput)

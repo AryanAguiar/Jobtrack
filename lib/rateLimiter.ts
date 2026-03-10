@@ -10,7 +10,7 @@ export const apiLimiter = new RateLimiterRedis({
 
 export const loginLimiter = new RateLimiterRedis({
     storeClient: client,
-    keyPrefix: "login-fail", //temp values
+    keyPrefix: "login-fail",
     points: 10,
     duration: 600,
     blockDuration: 600,
@@ -27,7 +27,7 @@ export const registerLimiter = new RateLimiterRedis({
 export const resumeUploadLimiter = new RateLimiterRedis({
     storeClient: client,
     keyPrefix: "resume-upload",
-    points: 200000,
+    points: 20,
     duration: 86400,
     blockDuration: 86400,
 })

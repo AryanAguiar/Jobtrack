@@ -1,22 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { jobFormValues } from "@/utils/types";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { HiOutlineBriefcase, HiOutlineLocationMarker, HiOutlineCash, HiOutlineDocumentText, HiOutlineClipboardList, HiOutlineAcademicCap, HiOutlineOfficeBuilding, HiOutlineLink, HiOutlineAnnotation } from "react-icons/hi";
+import { HiOutlineBriefcase, HiOutlineLocationMarker, HiOutlineCash, HiOutlineDocumentText, HiOutlineClipboardList, HiOutlineAcademicCap, HiOutlineOfficeBuilding, HiOutlineLink, HiOutlineAnnotation, HiOutlinePencilAlt, HiOutlineArrowLeft, HiOutlineGlobeAlt } from "react-icons/hi";
 import { Autocomplete, TextField } from "@mui/material";
 import { toast } from "sonner";
 
 const validationSchema = Yup.object({
-    title: Yup.string().max(200, "Title must be 200 characters or less").required("Title is required"),
-    company: Yup.string().max(100, "Company must be 100 characters or less").required("Company is required"),
-    location: Yup.string().max(250, "Location must be 250 characters or less").required("Location is required"),
-    description: Yup.string().required("Description is required"),
-    requirements: Yup.string().required("Requirements is required"),
-    responsibilities: Yup.string().required("Responsibilities is required"),
-    salary: Yup.number().typeError("Salary must be a number").nullable().transform((v, o) => o === "" ? null : v),
+    title: Yup.string().min(5, "Title must be at least 5 characters").max(200, "Title must be 200 characters or less").required("Title is required"),
+    company: Yup.string().min(3, "Company must be at least 3 characters").max(100, "Company must be 100 characters or less").required("Company is required"),
+    location: Yup.string().min(4, "Location must be at least 4 characters").max(200, "Location must be 200 characters or less").required("Location is required"),
+    description: Yup.string().min(20, "Description must be at least 20 characters").required("Description is required").max(5000, "Description must be 5000 characters or less"),
+    requirements: Yup.string().min(20, "Requirements must be at least 20 characters").required("Requirements is required").max(5000, "Requirements must be 5000 characters or less"),
+    responsibilities: Yup.string().min(20, "Responsibilities must be at least 20 characters").required("Responsibilities is required").max(5000, "Responsibilities must be 5000 characters or less"),
+    salary: Yup.string().nullable().transform((v, o) => o === "" ? null : v).max(80, "Salary must be 80 characters or less"),
     type: Yup.string().required("Type is required"),
     status: Yup.string().required("Status is required"),
+    notes: Yup.string().max(2000, "Notes must be 2000 characters or less"),
+    link: Yup.string().url("Please enter a valid URL (include http:// or https://)").nullable().transform((v, o) => (o === "" ? null : v)),
 });
 
 const jobTypeOptions = [
@@ -34,6 +37,20 @@ const jobStatusOptions = [
     { label: "Rejected", value: "REJECTED" },
     { label: "Withdrawn", value: "WITHDRAWN" }
 ];
+
+const emptyValues = {
+    title: "",
+    company: "",
+    location: "",
+    description: "",
+    requirements: "",
+    responsibilities: "",
+    salary: "",
+    type: "",
+    status: "",
+    link: "",
+    notes: ""
+};
 
 const FormField = ({ label, name, type = "text", placeholder, icon: Icon, as, maxLength }: { label: string, name: string, type?: string, placeholder?: string, icon?: any, as?: string, maxLength?: number }) => (
     <div className="flex flex-col gap-1.5">
@@ -68,12 +85,14 @@ const FormField = ({ label, name, type = "text", placeholder, icon: Icon, as, ma
     </div>
 );
 
-export default function JobForm({ isModal = false, onSuccess, onClose }: { isModal?: boolean; onSuccess?: () => void; onClose?: () => void }) {
-
+export default function JobForm({ isModal = false, onSuccess, onClose, initialData, jobId }: { isModal?: boolean; onSuccess?: () => void; onClose?: () => void; initialData?: any; jobId?: string }) {
     const handleSubmit = async (values: jobFormValues) => {
         try {
-            const response = await fetch("/api/jobs", {
-                method: "POST",
+            const url = jobId ? `/api/jobs/${jobId}` : "/api/jobs";
+            const method = jobId ? "PATCH" : "POST";
+
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -82,211 +101,204 @@ export default function JobForm({ isModal = false, onSuccess, onClose }: { isMod
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to create job");
+                throw new Error(errorData.error || `Failed to ${jobId ? 'update' : 'create'} job`);
             }
             const data = await response.json();
             console.log(data);
-            toast.success("Job created successfully");
+            toast.success(`Job ${jobId ? 'updated' : 'created'} successfully`);
             if (onSuccess) onSuccess();
         } catch (error: any) {
             console.error(error);
-            toast.error(error.message || "Failed to create job");
+            toast.error(error.message || `Failed to ${jobId ? 'update' : 'create'} job`);
         }
     }
 
-    if (isModal) {
-        return (
-            <div className="bg-white">
-                <Formik
-                    initialValues={{
-                        title: "",
-                        company: "",
-                        location: "",
-                        description: "",
-                        requirements: "",
-                        responsibilities: "",
-                        salary: "",
-                        type: "",
-                        status: "",
-                        link: "",
-                        notes: ""
-                    }}
-                    validationSchema={validationSchema}
-                    onSubmit={async (values, { setSubmitting }) => {
-                        try {
-                            await handleSubmit(values);
-                        } catch (error: any) {
-                            console.error(error);
-                        } finally {
-                            setSubmitting(false);
-                        }
-                    }}
-                >
-                    {({ isSubmitting, setFieldValue, values, errors, touched }) => (
-                        <Form className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField
-                                    label="Job Title"
-                                    name="title"
-                                    placeholder="e.g. Senior Frontend Developer"
-                                    icon={HiOutlineBriefcase}
-                                    maxLength={100}
-                                />
-                                <FormField
-                                    label="Company"
-                                    name="company"
-                                    placeholder="e.g. TechCorp Solutions"
-                                    icon={HiOutlineOfficeBuilding}
-                                    maxLength={100}
-                                />
-                            </div>
+    const formContent = (
+        <Formik
+            initialValues={initialData || emptyValues}
+            enableReinitialize
+            validationSchema={validationSchema}
+            onSubmit={async (values, { setSubmitting }) => {
+                try {
+                    await handleSubmit(values);
+                } catch (error: any) {
+                    console.error(error);
+                } finally {
+                    setSubmitting(false);
+                }
+            }}
+        >
+            {({ isSubmitting, setFieldValue, values, errors, touched }) => (
+                <Form className={isModal ? "space-y-4" : "p-8 space-y-6"}>
+                    <div className={`grid grid-cols-1 md:grid-cols-2 ${isModal ? 'gap-4' : 'gap-6'}`}>
+                        <FormField
+                            label="Job Title"
+                            name="title"
+                            placeholder="e.g. Senior Frontend Developer"
+                            icon={HiOutlineBriefcase}
+                            maxLength={200}
+                        />
+                        <FormField
+                            label="Company"
+                            name="company"
+                            placeholder="e.g. TechCorp Solutions"
+                            icon={HiOutlineOfficeBuilding}
+                            maxLength={100}
+                        />
+                    </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <FormField
-                                    label="Location"
-                                    name="location"
-                                    placeholder="e.g. Remote / NY"
-                                    icon={HiOutlineLocationMarker}
-                                    maxLength={100}
-                                />
-                                <FormField
-                                    label="Salary (Numeric)"
-                                    name="salary"
-                                    type="number"
-                                    placeholder="e.g. 120000"
-                                    icon={HiOutlineCash}
-                                />
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="flex flex-col gap-1.5">
-                                        <label htmlFor="type" className="text-sm font-semibold text-gray-700">Type</label>
-                                        <Autocomplete
-                                            options={jobTypeOptions}
-                                            getOptionLabel={(option) => option.label}
-                                            value={jobTypeOptions.find(o => o.value === values.type) || null}
-                                            onChange={(_, newValue) => setFieldValue("type", newValue?.value || "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    placeholder="Type"
-                                                    size="small"
-                                                    error={!!(errors.type && touched.type)}
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            borderRadius: '8px',
-                                                            backgroundColor: '#f9fafb',
-                                                            fontSize: '0.875rem',
-                                                            '& fieldset': { borderColor: '#e5e7eb' },
-                                                            '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                                                        },
-                                                    }}
-                                                />
-                                            )}
+                    <div className={`grid grid-cols-1 md:grid-cols-3 ${isModal ? 'gap-4' : 'gap-6'}`}>
+                        <FormField
+                            label="Location"
+                            name="location"
+                            placeholder={isModal ? "e.g. Remote / NY" : "e.g. Remote / New York, NY"}
+                            icon={HiOutlineLocationMarker}
+                            maxLength={200}
+                        />
+                        <FormField
+                            label="Salary"
+                            name="salary"
+                            placeholder="e.g. 120,000 / Negotiable"
+                            icon={HiOutlineCash}
+                            maxLength={80}
+                        />
+                        <div className={`grid grid-cols-2 ${isModal ? 'gap-2' : 'gap-4'}`}>
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="type" className="text-sm font-semibold text-gray-700">Type</label>
+                                <Autocomplete
+                                    options={jobTypeOptions}
+                                    getOptionLabel={(option) => option.label}
+                                    value={jobTypeOptions.find(o => o.value === values.type) || null}
+                                    onChange={(_, newValue) => setFieldValue("type", newValue?.value || "")}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            placeholder={isModal ? "Type" : "Select Type"}
+                                            size={isModal ? "small" : undefined}
+                                            error={!!(errors.type && touched.type)}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: isModal ? '8px' : '12px',
+                                                    backgroundColor: '#f9fafb',
+                                                    ...(isModal ? { fontSize: '0.875rem' } : {}),
+                                                    '& fieldset': { borderColor: '#e5e7eb' },
+                                                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+                                                },
+                                            }}
                                         />
-                                        <ErrorMessage name="type" component="p" className="text-[10px] font-medium text-red-500" />
-                                    </div>
-                                    <div className="flex flex-col gap-1.5">
-                                        <label htmlFor="status" className="text-sm font-semibold text-gray-700">Status</label>
-                                        <Autocomplete
-                                            options={jobStatusOptions}
-                                            getOptionLabel={(option) => option.label}
-                                            value={jobStatusOptions.find(o => o.value === values.status) || null}
-                                            onChange={(_, newValue) => setFieldValue("status", newValue?.value || "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    placeholder="Status"
-                                                    size="small"
-                                                    error={!!(errors.status && touched.status)}
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            borderRadius: '8px',
-                                                            backgroundColor: '#f9fafb',
-                                                            fontSize: '0.875rem',
-                                                            '& fieldset': { borderColor: '#e5e7eb' },
-                                                            '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                                                        },
-                                                    }}
-                                                />
-                                            )}
-                                        />
-                                        <ErrorMessage name="status" component="p" className="text-[10px] font-medium text-red-500" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <FormField
-                                    label="Description"
-                                    name="description"
-                                    as="textarea"
-                                    placeholder="Detailed description..."
-                                    icon={HiOutlineDocumentText}
-                                />
-
-                                <FormField
-                                    label="Requirements"
-                                    name="requirements"
-                                    as="textarea"
-                                    placeholder="Key requirements..."
-                                    icon={HiOutlineAcademicCap}
-                                />
-
-                                <FormField
-                                    label="Responsibilities"
-                                    name="responsibilities"
-                                    as="textarea"
-                                    placeholder="Day-to-day..."
-                                    icon={HiOutlineClipboardList}
-                                />
-
-                                <FormField
-                                    label="Notes"
-                                    name="notes"
-                                    as="textarea"
-                                    placeholder="Notes..."
-                                    icon={HiOutlineAnnotation}
-                                />
-
-                                <FormField
-                                    label="Link"
-                                    name="link"
-                                    as="textarea"
-                                    placeholder="Link to job..."
-                                    icon={HiOutlineLink}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-                                {isModal && onClose && (
-                                    <button
-                                        type="button"
-                                        onClick={onClose}
-                                        className="w-full md:w-auto px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all cursor-pointer"
-                                        disabled={isSubmitting}
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="w-full md:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Submitting...
-                                        </>
-                                    ) : (
-                                        "Create Job Opportunity"
                                     )}
-                                </button>
+                                />
+                                <ErrorMessage name="type" component="p" className={`${isModal ? 'text-[10px]' : 'text-xs'} font-medium text-red-500`} />
                             </div>
-                        </Form>
-                    )}
-                </Formik>
-            </div >
-        );
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="status" className="text-sm font-semibold text-gray-700">Status</label>
+                                <Autocomplete
+                                    options={jobStatusOptions}
+                                    getOptionLabel={(option) => option.label}
+                                    value={jobStatusOptions.find(o => o.value === values.status) || null}
+                                    onChange={(_, newValue) => setFieldValue("status", newValue?.value || "")}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            placeholder={isModal ? "Status" : "Select Status"}
+                                            size={isModal ? "small" : undefined}
+                                            error={!!(errors.status && touched.status)}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: isModal ? '8px' : '12px',
+                                                    backgroundColor: '#f9fafb',
+                                                    ...(isModal ? { fontSize: '0.875rem' } : {}),
+                                                    '& fieldset': { borderColor: '#e5e7eb' },
+                                                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+                                                },
+                                            }}
+                                        />
+                                    )}
+                                />
+                                <ErrorMessage name="status" component="p" className={`${isModal ? 'text-[10px]' : 'text-xs'} font-medium text-red-500`} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={isModal ? "space-y-4" : "space-y-6"}>
+                        <FormField
+                            label="Description"
+                            name="description"
+                            as="textarea"
+                            placeholder={isModal ? "Detailed description..." : "Detailed description of the role..."}
+                            icon={HiOutlineDocumentText}
+                            maxLength={5000}
+                        />
+
+                        <FormField
+                            label="Requirements"
+                            name="requirements"
+                            as="textarea"
+                            placeholder={isModal ? "Key requirements..." : "Key requirements for candidates..."}
+                            icon={HiOutlineAcademicCap}
+                            maxLength={5000}
+                        />
+
+                        <FormField
+                            label="Responsibilities"
+                            name="responsibilities"
+                            as="textarea"
+                            placeholder={isModal ? "Day-to-day..." : "Day-to-day responsibilities..."}
+                            icon={HiOutlineClipboardList}
+                            maxLength={5000}
+                        />
+
+                        <FormField
+                            label="Notes"
+                            name="notes"
+                            as="textarea"
+                            placeholder={isModal ? "Notes..." : "Personal notes..."}
+                            icon={HiOutlineAnnotation}
+                            maxLength={2000}
+                        />
+
+                        <FormField
+                            label="Link"
+                            name="link"
+                            type="url"
+                            placeholder={isModal ? "https://company.com/job" : "https://company.com/job-posting"}
+                            icon={HiOutlineLink}
+                        />
+                    </div>
+
+                    <div className={`flex items-center justify-end gap-${isModal ? '3' : '4'} pt-4 border-t border-gray-100`}>
+                        {((isModal && onClose) || (!isModal && onClose)) && (
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className={`${isModal ? 'w-full md:w-auto px-6 py-2.5' : 'px-8 py-3'} rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all cursor-pointer`}
+                                disabled={isSubmitting}
+                            >
+                                Cancel
+                            </button>
+                        )}
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className={`${isModal ? 'w-full md:w-auto px-6 py-2.5' : 'px-8 py-3'} bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all ${!isModal ? 'transform active:scale-[0.98] disabled:transform-none' : ''} flex items-center ${isModal ? 'justify-center' : ''} gap-2 cursor-pointer`}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <div className={`${isModal ? 'w-4 h-4' : 'w-5 h-5'} border-2 border-white/30 border-t-white rounded-full animate-spin`} />
+                                    Submitting...
+                                </>
+                            ) : (
+                                jobId ? "Update Job Opportunity" : "Create Job Opportunity"
+                            )}
+                        </button>
+                    </div>
+                </Form>
+            )}
+        </Formik>
+    );
+
+    if (isModal) {
+        return <div className="bg-white">{formContent}</div>;
     }
 
     return (
@@ -296,187 +308,7 @@ export default function JobForm({ isModal = false, onSuccess, onClose }: { isMod
                     <h2 className="text-2xl font-bold text-white">Create New Job</h2>
                     <p className="text-blue-100 text-sm mt-1">Fill in the details below to post a new job opening.</p>
                 </div>
-
-                <Formik
-                    initialValues={{
-                        title: "",
-                        company: "",
-                        location: "",
-                        description: "",
-                        requirements: "",
-                        responsibilities: "",
-                        salary: "",
-                        type: "",
-                        status: "",
-                        link: "",
-                        notes: ""
-                    }}
-                    validationSchema={validationSchema}
-                    onSubmit={async (values, { setSubmitting }) => {
-                        try {
-                            await handleSubmit(values);
-                        } catch (error: any) {
-                            console.error(error);
-                        } finally {
-                            setSubmitting(false);
-                        }
-                    }}
-                >
-                    {({ isSubmitting, setFieldValue, values, errors, touched }) => (
-                        <Form className="p-8 space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormField
-                                    label="Job Title"
-                                    name="title"
-                                    placeholder="e.g. Senior Frontend Developer"
-                                    icon={HiOutlineBriefcase}
-                                    maxLength={100}
-                                />
-                                <FormField
-                                    label="Company"
-                                    name="company"
-                                    placeholder="e.g. TechCorp Solutions"
-                                    icon={HiOutlineOfficeBuilding}
-                                    maxLength={100}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <FormField
-                                    label="Location"
-                                    name="location"
-                                    placeholder="e.g. Remote / New York, NY"
-                                    icon={HiOutlineLocationMarker}
-                                    maxLength={100}
-                                />
-                                <FormField
-                                    label="Salary (Numeric Optional)"
-                                    name="salary"
-                                    type="number"
-                                    placeholder="e.g. 120000"
-                                    icon={HiOutlineCash}
-                                />
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="flex flex-col gap-1.5">
-                                        <label htmlFor="type" className="text-sm font-semibold text-gray-700">Type</label>
-                                        <Autocomplete
-                                            options={jobTypeOptions}
-                                            getOptionLabel={(option) => option.label}
-                                            value={jobTypeOptions.find(o => o.value === values.type) || null}
-                                            onChange={(_, newValue) => setFieldValue("type", newValue?.value || "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    placeholder="Select Type"
-                                                    error={!!(errors.type && touched.type)}
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            borderRadius: '12px',
-                                                            backgroundColor: '#f9fafb',
-                                                            '& fieldset': { borderColor: '#e5e7eb' },
-                                                            '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                                                        },
-                                                    }}
-                                                />
-                                            )}
-                                        />
-                                        <ErrorMessage name="type" component="p" className="text-xs font-medium text-red-500" />
-                                    </div>
-                                    <div className="flex flex-col gap-1.5">
-                                        <label htmlFor="status" className="text-sm font-semibold text-gray-700">Status</label>
-                                        <Autocomplete
-                                            options={jobStatusOptions}
-                                            getOptionLabel={(option) => option.label}
-                                            value={jobStatusOptions.find(o => o.value === values.status) || null}
-                                            onChange={(_, newValue) => setFieldValue("status", newValue?.value || "")}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    placeholder="Select Status"
-                                                    error={!!(errors.status && touched.status)}
-                                                    sx={{
-                                                        '& .MuiOutlinedInput-root': {
-                                                            borderRadius: '12px',
-                                                            backgroundColor: '#f9fafb',
-                                                            '& fieldset': { borderColor: '#e5e7eb' },
-                                                            '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                                                        },
-                                                    }}
-                                                />
-                                            )}
-                                        />
-                                        <ErrorMessage name="status" component="p" className="text-xs font-medium text-red-500" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <FormField
-                                    label="Description"
-                                    name="description"
-                                    as="textarea"
-                                    placeholder="Detailed description of the role..."
-                                    icon={HiOutlineDocumentText}
-                                />
-                                <FormField
-                                    label="Requirements"
-                                    name="requirements"
-                                    as="textarea"
-                                    placeholder="Key requirements for candidates..."
-                                    icon={HiOutlineAcademicCap}
-                                />
-                                <FormField
-                                    label="Responsibilities"
-                                    name="responsibilities"
-                                    as="textarea"
-                                    placeholder="Day-to-day responsibilities..."
-                                    icon={HiOutlineClipboardList}
-                                />
-                                <FormField
-                                    label="Notes"
-                                    name="notes"
-                                    as="textarea"
-                                    placeholder="Personal notes..."
-                                    icon={HiOutlineAnnotation}
-                                />
-                                <FormField
-                                    label="Link"
-                                    name="link"
-                                    as="textarea"
-                                    placeholder="Link to job post..."
-                                    icon={HiOutlineLink}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
-                                {onClose && (
-                                    <button
-                                        type="button"
-                                        onClick={onClose}
-                                        className="px-8 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all cursor-pointer"
-                                        disabled={isSubmitting}
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all transform active:scale-[0.98] disabled:transform-none flex items-center gap-2 cursor-pointer"
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Submitting...
-                                        </>
-                                    ) : (
-                                        "Create Job Opportunity"
-                                    )}
-                                </button>
-                            </div>
-                        </Form>
-                    )}
-                </Formik>
+                {formContent}
             </div>
         </div>
     );
