@@ -54,64 +54,99 @@ const Analysis: FC<AnalysisProps> = ({ id }) => {
 
     return (
         <>
-            <div className="rounded-xl overflow-hidden bg-white shadow-sm border border-gray-100 flex flex-col min-h-[300px] h-auto lg:h-[1016px]">
-                <div className="p-5 flex items-center justify-between border-b border-gray-50">
-                    <h1 className="text-lg font-bold text-gray-900 border-l-4 border-green-500 pl-3">Recent Analysis</h1>
+            <div className="rounded-3xl overflow-hidden bg-glass flex flex-col h-full shadow-2xl">
+                <div className="p-6 flex items-center justify-between border-b border-[#2a2a3a]/50">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setOpen(true)}>
-                            <IoAddCircleOutline className="text-2xl text-gray-400 cursor-pointer hover:text-green-500 transition-colors" />
+                        <div className="w-1.5 h-8 bg-orange-gradient rounded-full" />
+                        <h1 className="text-xl font-bold text-white tracking-tight">Recent Analysis</h1>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setOpen(true)}
+                            className="p-2 hover:bg-white/5 rounded-full transition-colors group cursor-pointer"
+                        >
+                            <IoAddCircleOutline className="text-2xl text-gray-400 group-hover:text-orange-400 transition-colors" />
                         </button>
 
-                        <Link href="/evaluations" className="text-sm font-medium text-green-600 hover:text-green-700">View All</Link>
+                        <Link href="/evaluations" className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors bg-orange-500/10 px-4 py-1.5 rounded-full border border-orange-500/20">
+                            View All
+                        </Link>
                     </div>
                 </div>
-                <div className="p-5 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                     {loading ? (
-                        <div className="flex items-center justify-center h-full">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                        <div className="flex flex-col items-center justify-center h-full gap-4">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+                            <p className="text-sm text-gray-500 font-medium">Fetching analysis...</p>
                         </div>
                     ) : error ? (
-                        <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm">{error}</div>
+                        <div className="bg-red-500/5 text-red-400 p-6 rounded-2xl text-sm border border-red-500/10 backdrop-blur-md">
+                            <div className="flex items-center gap-3">
+                                <span className="text-lg">⚠️</span>
+                                <div>
+                                    <p className="font-bold">Error loading analysis</p>
+                                    <p className="opacity-80">{error}</p>
+                                </div>
+                            </div>
+                        </div>
                     ) : data.length === 0 ? (
-                        <div className="text-center py-10">
-                            <p className="text-gray-400">No analysis available</p>
+                        <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
+                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                                <IoAddCircleOutline className="text-4xl text-gray-500" />
+                            </div>
+                            <p className="text-gray-400 font-medium">No analysis available yet</p>
+                            <button onClick={() => setOpen(true)} className="mt-4 text-orange-400 text-sm font-bold hover:underline">Start your first analysis</button>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-6">
                             {data.slice(0, 4).map((analysis) => (
                                 <Link key={analysis.id} href={`/evaluations/${analysis.id}`} className="block">
-                                    <div className="bg-white border rounded-xl p-6 shadow-sm hover:shadow-md transition group relative">
-                                        <div className="flex justify-between items-start mb-4 gap-4 min-w-0">
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between items-start gap-2 mb-2 min-w-0">
-                                                    <h2 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors truncate flex-1 min-w-0">
-                                                        {analysis.resumeTitle}
-                                                    </h2>
-                                                    <div className="flex items-center gap-3 shrink-0">
-                                                        <Timer expiryDate={analysis.resumeExpiry} />
-                                                        <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">
-                                                            Match: {Math.round(analysis.matchScore)}%
-                                                        </span>
-                                                    </div>
+                                    <div className="bg-[#22222e]/40 border border-[#2a2a3a]/30 rounded-2xl p-6 hover:bg-[#2a2a3a]/40 hover:border-orange-500/30 transition-all duration-300 group relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-transparent to-orange-500/0 group-hover:from-orange-500/[0.02] group-hover:to-orange-500/[0.02] transition-colors pointer-events-none" />
+                                        <div className="flex flex-col mb-4 relative z-10">
+                                            <div className="flex items-start justify-between gap-4 mb-2">
+                                                <h2 className="text-xl font-bold text-gray-100 group-hover:text-orange-400 transition-colors truncate leading-tight flex-1 min-w-0">
+                                                    {analysis.resumeTitle}
+                                                </h2>
+                                                <div className="shrink-0 hidden sm:flex flex-col items-end">
+                                                    <span className="text-[10px] uppercase tracking-widest font-black text-gray-500 mb-0.5">Score</span>
+                                                    <span className="text-lg font-black text-orange-500 line-height-1">
+                                                        {Math.round(analysis.matchScore)}%
+                                                    </span>
                                                 </div>
+                                            </div>
 
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <Timer expiryDate={analysis.resumeExpiry} />
+                                            </div>
 
-                                                <p className="text-sm text-gray-500 mt-1 truncate w-full">
-                                                    Evaluated for:{" "}
-                                                    <span className="font-medium text-gray-700">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-sm text-gray-400 font-medium flex items-center gap-2 truncate">
+                                                    <span className="w-1 h-1 bg-gray-600 rounded-full shrink-0" />
+                                                    <span className="shrink-0">Evaluated for:</span>
+                                                    <span className="text-gray-200 font-bold tracking-tight truncate">
                                                         {analysis.jobTitle}
                                                     </span>
                                                 </p>
+                                                <div className="sm:hidden flex items-center gap-2">
+                                                    <span className="text-sm font-black text-orange-500">{Math.round(analysis.matchScore)}%</span>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="text-sm text-gray-600 line-clamp-2 italic mb-4">
-                                            &quot;{analysis.summary}&quot;
+                                        <div className="text-sm text-gray-400 line-clamp-10 md:line-clamp-4 lg:line-clamp-3 overflow-hidden leading-relaxed bg-white/5 p-4 rounded-xl border border-white/5 mb-5 italic relative z-10">
+                                            &ldquo;{analysis.summary}&rdquo;
                                         </div>
 
-                                        <div className="text-sm text-gray-600 border-t pt-4">
-                                            <span className="font-semibold text-gray-700">Uploaded on:</span>{" "}
-                                            {new Date(analysis.createdAt).toLocaleDateString()}
+                                        <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-[#2a2a3a]/50 relative z-10">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-green-500/50" />
+                                                <span className="font-semibold uppercase tracking-tighter text-gray-400">Analysis Complete</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-600">Generated on</span>{" "}
+                                                <span className="font-bold text-gray-400">{new Date(analysis.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>
@@ -121,16 +156,16 @@ const Analysis: FC<AnalysisProps> = ({ id }) => {
                 </div>
             </div>
             {open && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden relative flex flex-col text-gray-900">
-                        <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-xl p-4">
+                    <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden relative flex flex-col text-white">
+                        <div className="p-6 border-b border-[#2a2a3a] flex items-center justify-between">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">New Analysis</h2>
+                                <h2 className="text-xl font-bold text-white">New Analysis</h2>
                                 <p className="text-xs text-gray-500 mt-0.5">Evaluate a resume against a job post</p>
                             </div>
                             <button
                                 onClick={() => setOpen(false)}
-                                className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                                className="p-2 bg-[#22222e] hover:bg-[#2a2a3a] rounded-full text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

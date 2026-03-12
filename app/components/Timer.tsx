@@ -42,8 +42,8 @@ export default function Timer({ expiryDate }: TimerProps) {
 
     return (
         <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider whitespace-nowrap shadow-sm border transition-all duration-300 ${isExpired
-            ? "bg-red-50 text-red-600 border-red-100/50"
-            : "bg-purple-50 text-purple-600 border-purple-100/50 hover:bg-purple-100/50"
+            ? "bg-red-500/10 text-red-400 border-red-500/20"
+            : "bg-orange-500/10 text-orange-400 border-orange-500/20 hover:bg-orange-500/15"
             }`}>
             <HiOutlineClock className={`text-sm ${isExpired ? "animate-pulse" : ""}`} />
             <span>{!isExpired && "Expires in: "}{timeLeft}</span>

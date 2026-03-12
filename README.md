@@ -55,5 +55,4 @@ Server Runs On:
 http://localhost:3000
 
 ## Future Improvements:
-- Add ATS friendly check
-- Redesign UI
+- Nothing new yet

@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 import { JobType } from "@/utils/types";
 import Link from "next/link";
 import { HiArrowLeft, HiMagnifyingGlass, HiChevronUpDown, HiOutlineBriefcase, HiOutlineMapPin, HiOutlineCurrencyDollar, HiOutlineClock, HiOutlineTrash, HiPlus } from "react-icons/hi2";
-import Navbar from "../components/Navbar";
 import { Autocomplete, TextField } from "@mui/material";
 import JobForm from "../components/JobForm";
-import { toast } from "sonner";
+import { showCustomToast } from "../components/CustomToast";
 import { useRouter } from "next/navigation";
 
 const sortOptions = [
@@ -19,7 +18,6 @@ export default function JobsPage() {
     const router = useRouter();
     const [data, setData] = useState<JobType[]>([]);
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -50,21 +48,6 @@ export default function JobsPage() {
         }, 500);
         return () => clearTimeout(timer);
     }, [searchQuery]);
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const res = await fetch("/api/auth/me");
-                if (res.ok) {
-                    const data = await res.json();
-                    setUser(data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch user", error);
-            }
-        };
-        fetchUser();
-    }, []);
 
     const fetchJobs = async () => {
         setError(null);
@@ -102,269 +85,275 @@ export default function JobsPage() {
     }, [page, debouncedSearch, sortKey, sortOrder]);
 
     const deleteJob = async (id: string) => {
-        toast('Are you sure you want to delete this job?', {
-            action: {
-                label: 'Confirm',
-                onClick: async () => {
-                    try {
-                        setLoading(true);
-                        const res = await fetch(`/api/jobs/${id}`, {
-                            method: "DELETE",
-                            headers: { "Content-Type": "application/json" },
-                        });
-                        if (!res.ok) throw new Error("Failed to delete job");
-                        setData((prev) => prev.filter((item) => item.id !== id));
-                        toast.success("Job deleted successfully");
-                    } catch (error) {
-                        setError(error instanceof Error ? error.message : "Failed to delete job");
-                        toast.error("Failed to delete job");
-                    } finally {
-                        setLoading(false);
-                    }
+        showCustomToast.confirm(
+            "Delete Job Opportunity?",
+            "Are you sure you want to delete this job posting? This action cannot be undone.",
+            async () => {
+                try {
+                    setLoading(true);
+                    const res = await fetch(`/api/jobs/${id}`, {
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" },
+                    });
+                    if (!res.ok) throw new Error("Failed to delete job");
+                    setData((prev) => prev.filter((item) => item.id !== id));
+                    showCustomToast.success("Success!", "Job deleted successfully");
+                } catch (error) {
+                    setError(error instanceof Error ? error.message : "Failed to delete job");
+                    showCustomToast.error("Deletion Failed", "Failed to delete job");
+                } finally {
+                    setLoading(false);
                 }
             },
-            cancel: {
-                label: 'Cancel',
-                onClick: () => { }
-            }
-        });
+            "Confirm Delete"
+        );
     };
 
     const getStatusColor = (status: string) => {
         const s = status.toLowerCase();
-        if (s.includes("applied")) return "bg-blue-100 text-blue-700 border-blue-200";
-        if (s.includes("interview")) return "bg-purple-100 text-purple-700 border-purple-200";
-        if (s.includes("offer")) return "bg-green-100 text-green-700 border-green-200";
-        if (s.includes("reject")) return "bg-red-100 text-red-700 border-red-200";
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        if (s.includes("applied")) return "bg-blue-500/10 text-blue-400 border-blue-500/20";
+        if (s.includes("interview")) return "bg-purple-500/10 text-purple-400 border-purple-500/20";
+        if (s.includes("offer")) return "bg-green-500/10 text-green-400 border-green-500/20";
+        if (s.includes("reject")) return "bg-red-500/10 text-red-400 border-red-500/20";
+        return "bg-gray-500/10 text-gray-400 border-gray-500/20";
     };
 
     return (
-        <div className="min-h-screen bg-gray-50/50 pb-20">
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <Navbar userName={user?.name || "Loading..."} />
+        <div className="max-w-7xl w-full mx-auto px-6 py-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <button
+                    onClick={() => router.back()}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors group cursor-pointer"
+                >
+                    <HiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform" />
+                    Go Back
+                </button>
 
-                <div className="mt-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <button
-                        onClick={() => router.back()}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors group cursor-pointer"
-                    >
-                        <HiArrowLeft className="text-lg group-hover:-translate-x-1 transition-transform" />
-                        Go Back
-                    </button>
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                    <h1 className="text-2xl font-bold text-white">All Jobs</h1>
+                </div>
+            </div>
 
-                    <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        <h1 className="text-2xl font-bold text-gray-900">All Jobs</h1>
-                    </div>
+            {/* Filters Row */}
+            <div className="mt-8 bg-[#1a1a24] p-4 rounded-2xl border border-[#2a2a3a] flex flex-col lg:flex-row gap-4 items-center justify-between transition-all">
+                <div className="relative w-full lg:max-w-md">
+                    <HiMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg" />
+                    <input
+                        type="text"
+                        placeholder="Search in this page..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-4 py-2.5 bg-[#22222e] border border-[#3a3a4a] rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm text-white placeholder:text-gray-600"
+                    />
                 </div>
 
-                {/* Filters Row */}
-                <div className="mt-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-4 items-center justify-between transition-all">
-                    <div className="relative w-full lg:max-w-md">
-                        <HiMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
-                        <input
-                            type="text"
-                            placeholder="Search in this page..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                        />
-                    </div>
-
-                    <div className="flex flex-col md:flex-row items-center gap-3 w-full lg:w-auto">
-                        <div className="flex items-center gap-3 w-full md:w-auto">
-                            <div className="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 min-w-[200px]">
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Sort by:</span>
-                                <Autocomplete
-                                    options={sortOptions}
-                                    getOptionLabel={(option) => option.label}
-                                    value={sortOptions.find(o => o.value === sortKey) || sortOptions[0]}
-                                    onChange={(_, newValue) => {
-                                        setSortKey(newValue ? newValue.value as any : "createdAt");
-                                    }}
-                                    disableClearable
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            size="small"
-                                            variant="standard"
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                disableUnderline: true,
-                                                sx: { fontSize: '0.875rem', fontWeight: 500, color: '#374151' }
-                                            }}
-                                            sx={{ width: '100px' }}
-                                        />
-                                    )}
-                                />
-                            </div>
-
-                            <button
-                                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                                className="p-2.5 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-gray-600"
-                                title={sortOrder === "asc" ? "Ascending" : "Descending"}
-                            >
-                                <HiChevronUpDown className="text-lg" />
-                            </button>
+                <div className="flex flex-col md:flex-row items-center gap-3 w-full lg:w-auto">
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <div className="flex items-center gap-2 bg-[#22222e] border border-[#3a3a4a] rounded-xl px-4 py-2 min-w-[200px]">
+                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Sort by:</span>
+                            <Autocomplete
+                                options={sortOptions}
+                                getOptionLabel={(option) => option.label}
+                                value={sortOptions.find(o => o.value === sortKey) || sortOptions[0]}
+                                onChange={(_, newValue) => {
+                                    setSortKey(newValue ? newValue.value as any : "createdAt");
+                                }}
+                                disableClearable
+                                componentsProps={{
+                                    paper: {
+                                        sx: {
+                                            backgroundColor: '#22222e',
+                                            border: '1px solid #3a3a4a',
+                                            color: '#f1f1f4',
+                                            '& .MuiAutocomplete-option': {
+                                                color: '#f1f1f4',
+                                                '&:hover': { backgroundColor: '#2a2a3a' },
+                                                '&[aria-selected="true"]': { backgroundColor: '#3a3a4a' },
+                                            },
+                                        }
+                                    }
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        size="small"
+                                        variant="standard"
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            disableUnderline: true,
+                                            sx: { fontSize: '0.875rem', fontWeight: 500, color: '#f1f1f4' }
+                                        }}
+                                        sx={{ width: '100px' }}
+                                    />
+                                )}
+                            />
                         </div>
 
                         <button
-                            onClick={() => setIsAddModalOpen(true)}
-                            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all text-sm cursor-pointer whitespace-nowrap"
+                            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                            className="p-2.5 bg-[#22222e] border border-[#3a3a4a] rounded-xl hover:bg-[#2a2a3a] transition-colors text-gray-400"
+                            title={sortOrder === "asc" ? "Ascending" : "Descending"}
                         >
-                            <HiPlus className="text-lg" />
-                            Add Job
+                            <HiChevronUpDown className="text-lg" />
                         </button>
                     </div>
+
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all text-sm cursor-pointer whitespace-nowrap"
+                    >
+                        <HiPlus className="text-lg" />
+                        Add Job
+                    </button>
                 </div>
+            </div>
 
-                <div className="mt-8">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center p-10 sm:p-20 bg-white rounded-3xl border border-gray-100">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                            <p className="text-gray-500 font-medium">Loading jobs...</p>
+            <div className="mt-8">
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center p-10 sm:p-20 bg-[#1a1a24] rounded-3xl border border-[#2a2a3a]">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
+                        <p className="text-gray-500 font-medium">Loading jobs...</p>
+                    </div>
+                ) : error ? (
+                    <div className="bg-red-500/10 text-red-400 p-8 rounded-3xl text-center border border-red-500/20">
+                        <p className="font-bold mb-2 text-lg">Failed to Load</p>
+                        <p>{error}</p>
+                    </div>
+                ) : data.length === 0 ? (
+                    <div className="bg-[#1a1a24] rounded-3xl border border-dashed border-[#3a3a4a] p-10 sm:p-20 text-center">
+                        <div className="w-16 h-16 bg-[#22222e] rounded-full flex items-center justify-center mx-auto mb-4">
+                            <HiOutlineBriefcase className="text-3xl text-gray-600" />
                         </div>
-                    ) : error ? (
-                        <div className="bg-red-50 text-red-600 p-8 rounded-3xl text-center">
-                            <p className="font-bold mb-2 text-lg">Failed to Load</p>
-                            <p>{error}</p>
-                        </div>
-                    ) : data.length === 0 ? (
-                        <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-10 sm:p-20 text-center">
-                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <HiOutlineBriefcase className="text-3xl text-gray-300" />
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900">No jobs found</h3>
-                            <p className="text-gray-500 mt-1 max-w-xs mx-auto">
-                                {searchQuery ? `No results matching "${searchQuery}"` : "You haven't added any jobs yet."}
-                            </p>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {data.map((job: JobType) => (
-                                    <Link key={job.id} href={`/jobs/${job.id}`}>
-                                        <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col h-full cursor-pointer relative">
-                                            <div className="flex justify-between items-start mb-6">
-                                                <div className="p-3 bg-blue-50 rounded-2xl group-hover:bg-blue-600 transition-colors text-blue-600 group-hover:text-white transition-colors">
-                                                    <HiOutlineBriefcase className="text-2xl" />
-                                                </div>
-                                                <div className="flex flex-col items-end gap-2">
-                                                    <div className="flex flex-wrap gap-2">
-                                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(job.status)}`}>
-                                                            {job.status}
-                                                        </span>
-                                                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-purple-50 text-purple-700 border-purple-200">
-                                                            {job.type?.replace("_", " ")}
-                                                        </span>
-                                                    </div>
-                                                    <button
-                                                        className="p-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
-                                                        title="Delete Job"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            e.preventDefault();
-                                                            deleteJob(job.id);
-                                                        }}
-                                                    >
-                                                        <HiOutlineTrash className="text-xl" />
-                                                    </button>
-                                                </div>
+                        <h3 className="text-lg font-bold text-white">No jobs found</h3>
+                        <p className="text-gray-500 mt-1 max-w-xs mx-auto">
+                            {searchQuery ? `No results matching "${searchQuery}"` : "You haven't added any jobs yet."}
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {data.map((job: JobType) => (
+                                <Link key={job.id} href={`/jobs/${job.id}`}>
+                                    <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-3xl p-6 hover:border-[#3a3a4a] hover:-translate-y-1 transition-all duration-300 group flex flex-col h-full cursor-pointer relative">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="p-3 bg-orange-500/10 rounded-2xl group-hover:bg-orange-500 transition-colors text-orange-400 group-hover:text-white">
+                                                <HiOutlineBriefcase className="text-2xl" />
                                             </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                <h2 className="text-lg font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-                                                    {job.title}
-                                                </h2>
-                                                <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 min-w-0">
-                                                    <span className="w-1 h-1 bg-gray-300 rounded-full shrink-0"></span>
-                                                    <span className="shrink-0">At:</span>
-                                                    <span className="font-semibold text-gray-700 truncate">{job.company}</span>
-                                                </p>
-
-                                                <div className="mt-4 space-y-2 min-w-0">
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500 min-w-0">
-                                                        <HiOutlineMapPin className="text-base text-gray-400 shrink-0" />
-                                                        <span className="truncate">{job.location}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500 min-w-0">
-                                                        <HiOutlineCurrencyDollar className="text-base text-gray-400 shrink-0" />
-                                                        <span className="truncate">{job.salary || "Not specified"}</span>
-                                                    </div>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <div className="flex flex-wrap gap-2">
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(job.status)}`}>
+                                                        {job.status}
+                                                    </span>
+                                                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-purple-500/10 text-purple-400 border-purple-500/20">
+                                                        {job.type?.replace("_", " ")}
+                                                    </span>
                                                 </div>
-
-                                                <div className="mt-4 p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50 text-xs text-gray-500 italic line-clamp-3 leading-relaxed">
-                                                    {job.description || "No description provided."}
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-6 pt-5 border-t border-gray-50 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
-                                                <div className="flex items-center gap-2 text-gray-400">
-                                                    <HiOutlineClock className="text-base" />
-                                                    {new Date(job.createdAt).toLocaleDateString(undefined, {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        year: 'numeric'
-                                                    })}
-                                                </div>
-                                                <span className="text-blue-600 group-hover:underline cursor-pointer">View Details →</span>
+                                                <button
+                                                    className="p-2 text-gray-600 hover:text-red-400 transition-colors cursor-pointer"
+                                                    title="Delete Job"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        deleteJob(job.id);
+                                                    }}
+                                                >
+                                                    <HiOutlineTrash className="text-xl" />
+                                                </button>
                                             </div>
                                         </div>
-                                    </Link>
-                                ))}
-                            </div>
 
-                            {totalPages > 1 && (
-                                <div className="mt-12 flex items-center justify-center gap-2">
-                                    <button
-                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                        disabled={page === 1}
-                                        className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Previous
-                                    </button>
+                                        <div className="flex-1 min-w-0">
+                                            <h2 className="text-lg font-bold text-white truncate group-hover:text-orange-400 transition-colors">
+                                                {job.title}
+                                            </h2>
+                                            <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 min-w-0">
+                                                <span className="w-1 h-1 bg-gray-600 rounded-full shrink-0"></span>
+                                                <span className="shrink-0">At:</span>
+                                                <span className="font-semibold text-gray-300 truncate">{job.company}</span>
+                                            </p>
 
-                                    <div className="flex items-center gap-1">
-                                        {[...Array(totalPages)].map((_, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => setPage(i + 1)}
-                                                className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${page === i + 1
-                                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                                                    : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300"
-                                                    }`}
-                                            >
-                                                {i + 1}
-                                            </button>
-                                        ))}
+                                            <div className="mt-4 space-y-2 min-w-0">
+                                                <div className="flex items-center gap-2 text-xs text-gray-500 min-w-0">
+                                                    <HiOutlineMapPin className="text-base text-gray-600 shrink-0" />
+                                                    <span className="truncate">{job.location}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs text-gray-500 min-w-0">
+                                                    <HiOutlineCurrencyDollar className="text-base text-gray-600 shrink-0" />
+                                                    <span className="truncate">{job.salary || "Not specified"}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4 p-4 bg-[#22222e] rounded-2xl border border-[#2a2a3a] text-xs text-gray-500 italic line-clamp-3 leading-relaxed">
+                                                {job.description || "No description provided."}
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-6 pt-5 border-t border-[#2a2a3a] flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
+                                            <div className="flex items-center gap-2 text-gray-600">
+                                                <HiOutlineClock className="text-base" />
+                                                {new Date(job.createdAt).toLocaleDateString(undefined, {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric'
+                                                })}
+                                            </div>
+                                            <span className="text-orange-400 group-hover:underline cursor-pointer">View Details →</span>
+                                        </div>
                                     </div>
+                                </Link>
+                            ))}
+                        </div>
 
-                                    <button
-                                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                        disabled={page === totalPages}
-                                        className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Next
-                                    </button>
+                        {totalPages > 1 && (
+                            <div className="mt-12 flex items-center justify-center gap-2 pb-8">
+                                <button
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                    className="px-4 py-2 border border-[#3a3a4a] rounded-xl text-sm font-bold text-gray-400 bg-[#1a1a24] hover:bg-[#22222e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Previous
+                                </button>
+
+                                <div className="flex items-center gap-1">
+                                    {[...Array(totalPages)].map((_, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setPage(i + 1)}
+                                            className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${page === i + 1
+                                                ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                                                : "bg-[#1a1a24] text-gray-400 border border-[#3a3a4a] hover:border-[#4a4a5a]"
+                                                }`}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
                                 </div>
-                            )}
-                        </>
-                    )}
-                </div>
+
+                                <button
+                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                    disabled={page === totalPages}
+                                    className="px-4 py-2 border border-[#3a3a4a] rounded-xl text-sm font-bold text-gray-400 bg-[#1a1a24] hover:bg-[#22222e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
 
             {/* Add Job Modal */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative flex flex-col text-gray-900 text-left">
-                        <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-xl p-4">
+                    <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative flex flex-col text-white text-left">
+                        <div className="p-6 border-b border-[#2a2a3a] flex items-center justify-between">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Add New Job</h2>
+                                <h2 className="text-xl font-bold text-white">Add New Job</h2>
                                 <p className="text-xs text-gray-500 mt-0.5">Fill in the details for the new job post</p>
                             </div>
                             <button
                                 onClick={() => setIsAddModalOpen(false)}
-                                className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                                className="p-2 bg-[#22222e] hover:bg-[#2a2a3a] rounded-full text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

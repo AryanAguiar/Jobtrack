@@ -45,52 +45,68 @@ const Resumes: FC<ResumesProps> = ({ id }) => {
 
     return (
         <>
-            <div className="rounded-xl overflow-hidden bg-white shadow-sm border border-gray-100 flex flex-col min-h-[250px] h-auto lg:h-[500px]">
-                <div className="p-5 flex items-center justify-between border-b border-gray-50">
-                    <h1 className="text-lg font-bold text-gray-900 border-l-4 border-purple-500 pl-3">Recent Resumes</h1>
+            <div className="rounded-3xl overflow-hidden bg-glass flex flex-col h-full shadow-2xl">
+                <div className="p-6 flex items-center justify-between border-b border-[#2a2a3a]/50">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setOpen(true)}>
-                            <IoAddCircleOutline className="text-2xl text-gray-400 cursor-pointer hover:text-purple-500 transition-colors" />
+                        <div className="w-1.5 h-8 bg-orange-gradient rounded-full" />
+                        <h1 className="text-xl font-bold text-white tracking-tight">Recent Resumes</h1>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setOpen(true)}
+                            className="p-2 hover:bg-white/5 rounded-full transition-colors group cursor-pointer"
+                        >
+                            <IoAddCircleOutline className="text-2xl text-gray-400 group-hover:text-orange-400 transition-colors" />
                         </button>
-                        <Link href="/resumes" className="text-sm font-medium text-purple-600 hover:text-purple-700">View All</Link>
+                        <Link href="/resumes" className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors bg-orange-500/10 px-4 py-1.5 rounded-full border border-orange-500/20">
+                            View All
+                        </Link>
                     </div>
                 </div>
 
-                <div className="p-5 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                     {loading ? (
-                        <div className="flex items-center justify-center h-full">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                        <div className="flex flex-col items-center justify-center h-full gap-4">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+                            <p className="text-sm text-gray-500 font-medium">Fetching resumes...</p>
                         </div>
                     ) : error ? (
-                        <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm">{error}</div>
+                        <div className="bg-red-500/5 text-red-400 p-6 rounded-2xl text-sm border border-red-500/10 backdrop-blur-md">{error}</div>
                     ) : data.length === 0 ? (
-                        <div className="text-center py-10">
-                            <p className="text-gray-400">No resumes uploaded</p>
+                        <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
+                            <p className="text-gray-400 font-medium">No resumes uploaded yet</p>
                         </div>
                     ) : (
-
                         <div className="flex flex-col gap-4">
                             {data.slice(0, 4).map((resume) => (
                                 <Link key={resume.id} href={`/resumes/${resume.id}`} className="block">
-                                    <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all group cursor-pointer relative">
-                                        <div className="flex items-start justify-between min-w-0">
-                                            <div className="flex items-center gap-4 min-w-0 w-full">
-                                                <div className="p-3 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0">
-                                                    <HiOutlineDocumentText className="text-2xl" />
+                                    <div className="bg-[#22222e]/40 border border-[#2a2a3a]/30 rounded-2xl p-5 hover:bg-[#2a2a3a]/40 hover:border-orange-500/30 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-transparent to-orange-500/0 group-hover:from-orange-500/[0.02] group-hover:to-orange-500/[0.02] transition-colors pointer-events-none" />
+
+                                        <div className="flex items-start gap-4 relative z-10">
+                                            <div className="hidden sm:block p-3 bg-white/5 text-orange-400 rounded-xl group-hover:bg-orange-gradient group-hover:text-white transition-all duration-300 shrink-0 border border-white/5 group-hover:border-transparent shadow-lg flex items-center justify-center">
+                                                <HiOutlineDocumentText className="text-2xl" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="mb-2">
+                                                    <h2 className="text-lg font-bold text-gray-100 group-hover:text-orange-400 transition-colors truncate breakout-words leading-tight">
+                                                        {resume.title}
+                                                    </h2>
                                                 </div>
-                                                <div className="flex-1 min-w-0 w-full">
-                                                    <div className="flex items-start justify-between gap-2 min-w-0 w-full">
-                                                        <h2 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate overflow-hidden whitespace-nowrap flex-1 min-w-0">
-                                                            {resume.title}
-                                                        </h2>
-                                                        <div className="flex items-center shrink-0">
-                                                            <Timer expiryDate={resume.expiresAt} />
-                                                        </div>
+
+                                                <div className="flex flex-col gap-3">
+                                                    <div>
+                                                        <Timer expiryDate={resume.expiresAt} />
                                                     </div>
 
-                                                    <div className="flex items-center mt-1 text-xs text-gray-500">
-                                                        <HiOutlineCalendar className="mr-1.5" />
-                                                        <span>{new Date(resume.createdAt).toLocaleDateString()}</span>
+                                                    <div className="inline-flex items-center self-start px-2.5 py-1 rounded-md bg-orange-500/10 border border-orange-500/20 shadow-sm">
+                                                        <span className="text-xs text-gray-400 font-medium mr-1.5">ATS Score:</span>
+                                                        <span className="text-sm font-bold text-orange-400">{resume?.atsScore?.score || "N/A"}</span>
+                                                    </div>
+
+                                                    <div className="flex items-center text-xs text-gray-500 font-medium">
+                                                        <HiOutlineCalendar className="mr-1.5 text-orange-500/50 shrink-0" />
+                                                        <span>{new Date(resume.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -103,16 +119,16 @@ const Resumes: FC<ResumesProps> = ({ id }) => {
                 </div>
             </div>
             {open && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden relative flex flex-col text-gray-900">
-                        <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-xl p-4">
+                    <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-hidden relative flex flex-col text-white">
+                        <div className="p-6 border-b border-[#2a2a3a] flex items-center justify-between">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Upload Resume</h2>
+                                <h2 className="text-xl font-bold text-white">Upload Resume</h2>
                                 <p className="text-xs text-gray-500 mt-0.5">Add a new resume to your library</p>
                             </div>
                             <button
                                 onClick={() => setOpen(false)}
-                                className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                                className="p-2 bg-[#22222e] hover:bg-[#2a2a3a] rounded-full text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

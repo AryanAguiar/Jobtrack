@@ -45,58 +45,72 @@ const Jobs: FC<JobsProps> = ({ id }) => {
 
     return (
         <>
-            <div className="rounded-xl overflow-hidden bg-white shadow-sm border border-gray-100 flex flex-col min-h-[250px] h-auto lg:h-[500px]">
-                <div className="p-5 flex items-center justify-between border-b border-gray-50">
-                    <h1 className="text-lg font-bold text-gray-900 border-l-4 border-blue-500 pl-3">Recent Jobs</h1>
+            <div className="rounded-3xl overflow-hidden bg-glass flex flex-col h-full shadow-2xl">
+                <div className="p-6 flex items-center justify-between border-b border-[#2a2a3a]/50">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => setOpen(true)}>
-                            <IoAddCircleOutline className="text-2xl text-gray-400 cursor-pointer hover:text-blue-500 transition-colors" />
+                        <div className="w-1.5 h-8 bg-orange-gradient rounded-full" />
+                        <h1 className="text-xl font-bold text-white tracking-tight">Recent Jobs</h1>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setOpen(true)}
+                            className="p-2 hover:bg-white/5 rounded-full transition-colors group cursor-pointer"
+                        >
+                            <IoAddCircleOutline className="text-2xl text-gray-400 group-hover:text-orange-400 transition-colors" />
                         </button>
 
-                        <Link href="/jobs" className="text-sm font-medium text-blue-600 hover:text-blue-700">View All</Link>
+                        <Link href="/jobs" className="text-sm font-semibold text-orange-400 hover:text-orange-300 transition-colors bg-orange-500/10 px-4 py-1.5 rounded-full border border-orange-500/20">
+                            View All
+                        </Link>
                     </div>
                 </div>
 
-                <div className="p-5 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                     {loading ? (
-                        <div className="flex items-center justify-center h-full">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        <div className="flex flex-col items-center justify-center h-full gap-4">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+                            <p className="text-sm text-gray-500 font-medium">Fetching jobs...</p>
                         </div>
                     ) : error ? (
-                        <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm">{error}</div>
+                        <div className="bg-red-500/5 text-red-400 p-6 rounded-2xl text-sm border border-red-500/10 backdrop-blur-md">{error}</div>
                     ) : data.length === 0 ? (
-                        <div className="text-center py-10">
-                            <p className="text-gray-400">No jobs tracked yet</p>
+                        <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
+                            <p className="text-gray-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-full">No jobs tracked yet</p>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-4">
                             {data.slice(0, 4).map((job) => (
                                 <Link key={job.id} href={`/jobs/${job.id}`} className="block">
-                                    <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all group cursor-pointer relative">
-                                        <div className="flex items-start justify-between gap-2 min-w-0 w-full">
-                                            <h2 className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate overflow-hidden whitespace-nowrap flex-1 min-w-0">
-                                                {job.title}
-                                            </h2>
-                                            <div className="flex flex-col items-end gap-1 shrink-0">
-                                                <span className="text-[10px] uppercase tracking-wider font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
+                                    <div className="bg-[#22222e]/40 border border-[#2a2a3a]/30 rounded-2xl p-5 hover:bg-[#2a2a3a]/40 hover:border-orange-500/30 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+                                        {/* Subtle hover gradient */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-transparent to-orange-500/0 group-hover:from-orange-500/[0.02] group-hover:to-orange-500/[0.02] transition-colors pointer-events-none" />
+
+                                        <div className="flex items-start justify-between gap-4 mb-4 relative z-10">
+                                            <div className="flex-1 min-w-0">
+                                                <h2 className="text-lg font-bold text-gray-100 group-hover:text-orange-400 transition-colors truncate leading-tight mb-2.5">
+                                                    {job.title}
+                                                </h2>
+                                                <div className="flex items-center text-sm text-gray-400 font-medium bg-white/5 py-1 px-3 rounded-lg border border-white/5 w-fit">
+                                                    <HiOutlineBriefcase className="mr-2 text-orange-500/70 shrink-0" />
+                                                    <span className="truncate">{job.company}</span>
+                                                </div>
+                                            </div>
+                                            <div className="shrink-0">
+                                                <span className="text-[10px] uppercase tracking-[0.15em] font-black bg-orange-500/10 text-orange-400 px-3 py-1.5 rounded-full border border-orange-500/20 backdrop-blur-md shadow-sm">
                                                     {job.status}
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <div className="mt-3 space-y-2 min-w-0">
-                                            <div className="flex items-center text-sm text-gray-600 min-w-0">
-                                                <HiOutlineBriefcase className="mr-2 text-gray-400 shrink-0" />
-                                                <span className="font-medium truncate block">{job.company}</span>
-                                            </div>
-                                            <div className="flex items-center text-sm text-gray-500 min-w-0">
-                                                <HiOutlineLocationMarker className="mr-2 text-gray-400 shrink-0" />
-                                                <span className="truncate block">{job.location}</span>
+                                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 relative z-10 pt-4 border-t border-white/5">
+                                            <div className="flex items-center text-xs text-gray-500 font-medium">
+                                                <HiOutlineLocationMarker className="mr-1.5 text-orange-500/40 shrink-0" />
+                                                <span className="truncate">{job.location}</span>
                                             </div>
                                             {job.salary && (
-                                                <div className="flex items-center text-sm text-gray-500 min-w-0">
-                                                    <HiOutlineCurrencyDollar className="mr-2 text-gray-400 shrink-0" />
-                                                    <span className="truncate block">{job.salary}</span>
+                                                <div className="flex items-center text-xs text-gray-400 font-bold bg-green-500/5 px-2.5 py-1 rounded-full border border-green-500/10">
+                                                    <HiOutlineCurrencyDollar className="mr-1 text-green-500/70 shrink-0" />
+                                                    <span className="truncate">{job.salary}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -108,16 +122,16 @@ const Jobs: FC<JobsProps> = ({ id }) => {
                 </div>
             </div>
             {open && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative flex flex-col">
-                        <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-xl p-4">
+                    <div className="bg-[#1a1a24] border border-[#2a2a3a] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative flex flex-col">
+                        <div className="p-6 border-b border-[#2a2a3a] flex items-center justify-between">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Add New Job</h2>
+                                <h2 className="text-xl font-bold text-white">Add New Job</h2>
                                 <p className="text-xs text-gray-500 mt-0.5">Fill in the details for the new position</p>
                             </div>
                             <button
                                 onClick={() => setOpen(false)}
-                                className="p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                                className="p-2 bg-[#22222e] hover:bg-[#2a2a3a] rounded-full text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

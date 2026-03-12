@@ -4,12 +4,26 @@ import { useEffect, useState } from "react";
 import { JobType, ResumeType } from "@/utils/types";
 import { Autocomplete, TextField, Box, Typography, CircularProgress } from "@mui/material";
 import { toast } from "sonner";
+import { showCustomToast } from "./CustomToast";
 
 interface AnalyzeResumeForJobProps {
     isModal?: boolean;
     onSuccess?: () => void;
     onClose?: () => void;
 }
+
+const darkMuiSx = {
+    '& .MuiOutlinedInput-root': {
+        borderRadius: '12px',
+        backgroundColor: '#22222e',
+        color: '#f1f1f4',
+        '& fieldset': { borderColor: '#3a3a4a' },
+        '&:hover fieldset': { borderColor: '#4a4a5a' },
+        '&.Mui-focused fieldset': { borderColor: '#f97316', borderWidth: '2px' },
+    },
+    '& .MuiInputBase-input': { color: '#f1f1f4' },
+    '& .MuiSvgIcon-root': { color: '#6b7280' },
+};
 
 export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: AnalyzeResumeForJobProps) {
     const [resumes, setResumes] = useState<ResumeType[]>([]);
@@ -75,15 +89,28 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                 throw new Error(errorData.message || "Failed to analyze resume.");
             }
 
-            toast.success("Analysis started successfully!");
+            showCustomToast.success("Analysis started successfully!");
             if (onSuccess) onSuccess();
             if (onClose) onClose();
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "An error occurred during analysis.";
             setError(errorMessage);
-            toast.error(errorMessage);
+            showCustomToast.error("Analysis Failed", errorMessage);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const darkPaperProps = {
+        sx: {
+            backgroundColor: '#22222e',
+            border: '1px solid #3a3a4a',
+            color: '#f1f1f4',
+            '& .MuiAutocomplete-option': {
+                color: '#f1f1f4',
+                '&:hover': { backgroundColor: '#2a2a3a' },
+                '&[aria-selected="true"]': { backgroundColor: '#3a3a4a' },
+            },
         }
     };
 
@@ -91,14 +118,14 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
         <div className="flex flex-col gap-6">
 
             {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm italic">
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm italic">
                     {error}
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 ml-1">
+                    <label className="block text-sm font-semibold text-gray-300 ml-1">
                         Select Resume
                     </label>
                     <Autocomplete
@@ -113,6 +140,7 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                 maxWidth: "100%",
                             }
                         }}
+                        componentsProps={{ paper: darkPaperProps }}
                         ListboxProps={{
                             sx: {
                                 maxHeight: 280,
@@ -128,24 +156,12 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                     ...params.InputProps,
                                     endAdornment: (
                                         <>
-                                            {fetching ? <CircularProgress size={20} /> : null}
+                                            {fetching ? <CircularProgress size={20} sx={{ color: '#f97316' }} /> : null}
                                             {params.InputProps.endAdornment}
                                         </>
                                     ),
                                 }}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: '12px',
-                                        backgroundColor: '#f9fafb',
-
-                                        '& fieldset': { borderColor: '#e5e7eb' },
-                                        '&:hover fieldset': { borderColor: '#d1d5db' },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: '#10b981',
-                                            borderWidth: '2px'
-                                        },
-                                    }
-                                }}
+                                sx={darkMuiSx}
                             />
                         )}
                         renderOption={(props, option) => {
@@ -172,7 +188,8 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                             width: "100%",
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
-                                            textOverflow: "ellipsis"
+                                            textOverflow: "ellipsis",
+                                            color: '#f1f1f4'
                                         }}
                                     >
                                         {option.title}
@@ -180,12 +197,12 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
 
                                     <Typography
                                         variant="caption"
-                                        color="text.secondary"
                                         sx={{
                                             width: "100%",
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
-                                            textOverflow: "ellipsis"
+                                            textOverflow: "ellipsis",
+                                            color: '#9ca3af'
                                         }}
                                     >
                                         {option.fileName}
@@ -197,7 +214,7 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                 </div>
 
                 <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700 ml-1">
+                    <label className="block text-sm font-semibold text-gray-300 ml-1">
                         Select Job
                     </label>
                     <Autocomplete
@@ -212,6 +229,7 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                 maxWidth: "100%",
                             }
                         }}
+                        componentsProps={{ paper: darkPaperProps }}
                         ListboxProps={{
                             sx: {
                                 maxHeight: 280,
@@ -228,25 +246,13 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                     endAdornment: (
                                         <>
                                             {fetching ? (
-                                                <CircularProgress color="inherit" size={20} />
+                                                <CircularProgress size={20} sx={{ color: '#f97316' }} />
                                             ) : null}
                                             {params.InputProps.endAdornment}
                                         </>
                                     ),
                                 }}
-                                sx={{
-                                    "& .MuiOutlinedInput-root": {
-                                        borderRadius: "12px",
-                                        backgroundColor: "#f9fafb",
-
-                                        "& fieldset": { borderColor: "#e5e7eb" },
-                                        "&:hover fieldset": { borderColor: "#d1d5db" },
-                                        "&.Mui-focused fieldset": {
-                                            borderColor: "#10b981",
-                                            borderWidth: "2px",
-                                        },
-                                    },
-                                }}
+                                sx={darkMuiSx}
                             />
                         )}
                         renderOption={(props, option) => {
@@ -264,9 +270,6 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                         py: 1,
                                         maxWidth: "100%",
                                         overflow: "hidden",
-                                        "&:hover": {
-                                            backgroundColor: "#f3f4f6",
-                                        },
                                     }}
                                 >
                                     <Typography
@@ -277,6 +280,7 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
+                                            color: '#f1f1f4'
                                         }}
                                     >
                                         {option.title}
@@ -284,12 +288,12 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
 
                                     <Typography
                                         variant="caption"
-                                        color="text.secondary"
                                         sx={{
                                             width: "100%",
                                             whiteSpace: "nowrap",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
+                                            color: '#9ca3af'
                                         }}
                                     >
                                         {option.company}
@@ -305,7 +309,7 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all cursor-pointer"
+                            className="flex-1 px-6 py-3 rounded-xl border border-[#3a3a4a] text-gray-400 font-semibold hover:bg-[#22222e] transition-all cursor-pointer"
                             disabled={loading}
                         >
                             Cancel
@@ -313,7 +317,7 @@ export default function AnalyzeResumeForJob({ isModal, onSuccess, onClose }: Ana
                     )}
                     <button
                         type="submit"
-                        className="flex-1 bg-green-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                        className="flex-1 bg-orange-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                         disabled={loading || fetching || !selectedResume || !selectedJob}
                     >
                         {loading ? (
