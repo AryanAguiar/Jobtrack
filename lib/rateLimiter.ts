@@ -31,3 +31,11 @@ export const resumeUploadLimiter = new RateLimiterRedis({
     duration: 86400,
     blockDuration: 86400,
 })
+
+export const rateLimiterAts = new RateLimiterRedis({
+    storeClient: client,
+    keyPrefix: "ats-limiter",
+    points: 10,
+    duration: 600,
+    blockDuration: 600,
+})

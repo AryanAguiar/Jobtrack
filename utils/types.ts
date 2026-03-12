@@ -102,6 +102,7 @@ export interface ResumeType {
     fileName: string;
     fileUrl: string;
     mimeType: string;
+    atsScore: string;
     createdAt: Date;
     updatedAt: Date;
     expiresAt: Date;

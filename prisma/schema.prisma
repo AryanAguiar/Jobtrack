@@ -70,6 +70,7 @@ model Resume {
   mimeType String
   fileUrl String
   contentHash String
+  atsScore Json?
   createdAt DateTime @default(now())
   expiresAt DateTime
   

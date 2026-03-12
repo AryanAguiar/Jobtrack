@@ -13,6 +13,7 @@ const Navbar: FC<NavbarProps> = ({ userName }) => {
         await fetch("/api/auth/login", {
             method: "DELETE",
         });
+        localStorage.setItem("logout-event", Date.now().toString());
         window.location.href = "/login";
         setOpen(false);
     }

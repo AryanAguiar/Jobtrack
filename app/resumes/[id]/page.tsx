@@ -12,6 +12,8 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
     const { id } = use(params);
     const [resume, setResume] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
+    const [checkingAts, setCheckingAts] = useState(false);
+    const [atsScoreData, setAtsScoreData] = useState<any | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
     const router = useRouter();
@@ -51,6 +53,14 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
 
                 const result = await res.json();
                 setResume(result);
+                if (result.atsScore) {
+                    try {
+                        const parsedAts = typeof result.atsScore === 'string' ? JSON.parse(result.atsScore) : result.atsScore;
+                        setAtsScoreData(parsedAts);
+                    } catch (e) {
+                        console.error('Failed to parse ATS score', e);
+                    }
+                }
                 setLoading(false);
             } catch (error) {
                 setError(
@@ -96,6 +106,26 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                 onClick: () => { }
             }
         });
+    };
+
+    const checkAtsScore = async () => {
+        try {
+            setCheckingAts(true);
+            const res = await fetch(`/api/ats`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ resumeId: id })
+            });
+            if (!res.ok) throw new Error("Failed to check ATS friendliness");
+
+            const result = await res.json();
+            setAtsScoreData(result);
+            toast.success("ATS score calculated successfully!");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to calculate ATS score");
+        } finally {
+            setCheckingAts(false);
+        }
     };
 
     if (!id) return null;
@@ -147,6 +177,46 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                                     </div>
                                 </div>
 
+                                {atsScoreData && (
+                                    <div className="p-4 sm:p-6 lg:p-8 bg-blue-50/50 border-t border-b border-blue-100">
+                                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                                            <div>
+                                                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                                    <HiOutlineLightBulb className="text-blue-500" />
+                                                    ATS Friendliness Check
+                                                </h3>
+                                                <p className="text-gray-600 mt-1">{atsScoreData.summary}</p>
+                                            </div>
+                                            <div className="flex flex-col items-end">
+                                                <div className="text-3xl font-black text-blue-600">
+                                                    {atsScoreData.score}
+                                                    <span className="text-lg text-blue-400 font-bold">/100</span>
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1 flex gap-3">
+                                                    <span>Structure: {atsScoreData.breakdown?.structure}/50</span>
+                                                    <span>Content: {atsScoreData.breakdown?.content}/50</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {atsScoreData.improvements && atsScoreData.improvements.length > 0 && (
+                                            <div className="bg-white rounded-xl p-4 border border-blue-100 shadow-sm">
+                                                <h4 className="font-bold text-sm text-gray-900 mb-3 flex items-center gap-2">
+                                                    <HiOutlineExclamationCircle className="text-amber-500" />
+                                                    Suggested Improvements
+                                                </h4>
+                                                <ul className="space-y-2">
+                                                    {atsScoreData.improvements.map((improvement: string, i: number) => (
+                                                        <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
+                                                            <span className="text-blue-500 mt-0.5">•</span>
+                                                            {improvement}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="p-4 sm:p-6 lg:p-8">
                                     <iframe
@@ -156,7 +226,19 @@ export default function ResumePage({ params }: { params: Promise<{ id: string }>
                                         className="rounded-xl border border-gray-200 shadow-sm"
                                     />
 
-                                    <div className="mt-10 pt-8 border-t border-gray-50 flex justify-end gap-3">
+                                    <div className="mt-10 pt-8 border-t border-gray-50 flex flex-wrap justify-end gap-3">
+                                        {!atsScoreData && (
+                                            <button
+                                                onClick={checkAtsScore}
+                                                disabled={checkingAts}
+                                                className="px-6 py-2.5 rounded-xl bg-blue-50 text-blue-600 font-bold hover:bg-blue-100 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            >
+                                                {checkingAts ? (
+                                                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></span>
+                                                ) : <HiOutlineDocumentText className="text-lg" />}
+                                                {checkingAts ? "Evaluating..." : "Check ATS Score"}
+                                            </button>
+                                        )}
                                         <button
                                             onClick={deleteResume}
                                             className="px-6 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold hover:bg-red-100 transition-colors shadow-sm"

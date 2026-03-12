@@ -23,6 +23,8 @@ This project is my way of learning the stack deeply by building something comple
 ## This Project's Tech Stack Consists Of:
 - Frontend / API: Next.js (App Router)
 - Database: PostgreSQL
+- Redis: Upstash (for rate limiting and caching)
+- Supabase: For storing PDF's
 - ORM: Prisma
 - AI Model: llama-3.1-8b-instant (via Groq API)
 - Language: TypeScript 
@@ -31,12 +33,13 @@ This project is my way of learning the stack deeply by building something comple
 - Node.js (v24.13.0)
 - Prisma (v6.19.0)
 - Groq API key
+- Upstash Redis key
+- Supabase key
 
 ## Installation:
 npm install
 npx prisma generate
 npm run dev
-
 
 ## Create a .env file:
 DATABASE_URL=your_database_url
@@ -52,4 +55,5 @@ Server Runs On:
 http://localhost:3000
 
 ## Future Improvements:
-- Nothing new yet
+- Add ATS friendly check
+- Redesign UI

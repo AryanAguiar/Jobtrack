@@ -20,10 +20,11 @@ export async function GET(request: Request) {
         const resumes = await getUserResumes(user.id, page, limit, search, sortKey as "createdAt" | "title", sortOrder);
         return NextResponse.json(resumes, { status: 200 });
     } catch (error) {
+        console.error("Error in GET /api/resumes", error);
         if (error instanceof ServiceError) {
             return NextResponse.json({ message: error.message }, { status: error.status });
         }
-        return NextResponse.json({ message: "Failed to fetch resumes" }, { status: 500 });
+        return NextResponse.json({ message: "Failed to fetch resumes", error: String(error) }, { status: 500 });
     }
 }
 

@@ -1,14 +1,10 @@
-import path from "path";
-import fs from "fs";
 import { prisma } from "@/lib/db";
 import { parsePdf } from "@/lib/parser";
 import { hashText, normalizeText, ServiceError } from "@/utils/helpers";
 import { resumeUploadLimiter } from "@/lib/rateLimiter";
 import { supaBase } from "@/lib/supabase";
 import mammoth from "mammoth";
-import { NextResponse } from "next/server";
 
-// const UPLOADS_DIR = path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export interface PaginatedResumesResult {
