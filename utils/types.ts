@@ -2,6 +2,16 @@ export interface JwtPayload {
     id: string;
 }
 
+export interface AtsCheckResult {
+    score: number;
+    breakdown: {
+        structure: number;
+        content: number;
+    };
+    summary: string;
+    improvements: string[];
+}
+
 export interface ResumeEvaluation {
     matchScore: number;
     summary: string;
@@ -100,9 +110,8 @@ export interface ResumeType {
     userId: string;
     title: string;
     fileName: string;
-    fileUrl: string;
     mimeType: string;
-    atsScore: string;
+    atsScore: AtsCheckResult | null;
     createdAt: Date;
     updatedAt: Date;
     expiresAt: Date;

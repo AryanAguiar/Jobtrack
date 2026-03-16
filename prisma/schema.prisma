@@ -68,7 +68,6 @@ model Resume {
   title String
   fileName String
   mimeType String
-  fileUrl String
   contentHash String
   atsScore Json?
   createdAt DateTime @default(now())

@@ -17,6 +17,12 @@ export interface PaginatedResumesResult {
     };
 }
 
+// Helper to generate public URL for a resume
+export function getResumeUrl(fileName: string) {
+    const { data } = supaBase.storage.from("JobtrackResumes").getPublicUrl(fileName);
+    return data.publicUrl;
+}
+
 // Get all resumes for a given user including parsed data
 export async function getUserResumes(
     userId: string,
@@ -51,8 +57,14 @@ export async function getUserResumes(
             where
         })
     ]);
+
+    const resumesWithUrls = resumes.map((r) => ({
+        ...r,
+        fileUrl: getResumeUrl(r.fileName),
+    }));
+
     return {
-        data: resumes,
+        data: resumesWithUrls,
         meta: {
             page,
             limit,
@@ -73,7 +85,10 @@ export async function getResumeById(resumeId: string, userId: string) {
         throw new ServiceError("Resume not found", 404);
     }
 
-    return resume;
+    return {
+        ...resume,
+        fileUrl: getResumeUrl(resume.fileName),
+    };
 }
 
 // Upload a resume
@@ -114,9 +129,6 @@ export async function uploadResume(file: File, title: string, userId: string) {
         throw new ServiceError(`Upload failed: ${error.message}`, 500);
     }
 
-    const { data } = supaBase.storage.from("JobtrackResumes").getPublicUrl(safeName);
-    const fileUrl = data.publicUrl;
-
     let parsed;
     try {
         parsed = await parsePdf(buffer, file.name);
@@ -149,7 +161,6 @@ export async function uploadResume(file: File, title: string, userId: string) {
         data: {
             title,
             fileName: safeName,
-            fileUrl,
             userId,
             mimeType: file.type,
             contentHash: resumeHash,
@@ -166,7 +177,10 @@ export async function uploadResume(file: File, title: string, userId: string) {
         include: { parsedData: true },
     });
 
-    return resume;
+    return {
+        ...resume,
+        fileUrl: getResumeUrl(resume.fileName),
+    };
 }
 
 // Delete a resume by id, scoped to a user. Also removes the file from disk if it exists.

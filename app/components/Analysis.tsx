@@ -95,7 +95,7 @@ const Analysis: FC<AnalysisProps> = ({ id }) => {
                                 <IoAddCircleOutline className="text-4xl text-gray-500" />
                             </div>
                             <p className="text-gray-400 font-medium">No analysis available yet</p>
-                            <button onClick={() => setOpen(true)} className="mt-4 text-orange-400 text-sm font-bold hover:underline">Start your first analysis</button>
+                            <button onClick={() => setOpen(true)} className="mt-4 text-orange-400 text-sm font-bold hover:underline cursor-pointer">Start your first analysis</button>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-6">
@@ -134,7 +134,7 @@ const Analysis: FC<AnalysisProps> = ({ id }) => {
                                             </div>
                                         </div>
 
-                                        <div className="text-sm text-gray-400 line-clamp-10 md:line-clamp-4 lg:line-clamp-3 overflow-hidden leading-relaxed bg-white/5 p-4 rounded-xl border border-white/5 mb-5 italic relative z-10">
+                                        <div className="text-sm text-gray-400 leading-relaxed bg-white/5 p-4 rounded-xl border border-white/5 mb-5 italic relative z-10">
                                             &ldquo;{analysis.summary}&rdquo;
                                         </div>
 

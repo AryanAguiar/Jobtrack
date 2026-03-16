@@ -27,6 +27,12 @@ export default function CustomToast({
     const duration = 5000;
 
     useEffect(() => {
+        if (progress <= 0) {
+            toast.dismiss(t);
+        }
+    }, [progress, t]);
+
+    useEffect(() => {
         const timer = setInterval(() => {
             setProgress((prev) => Math.max(0, prev - (100 / (duration / 100))));
         }, 100);
@@ -73,9 +79,17 @@ export default function CustomToast({
             </h3>
 
             {/* Subtitle / Timer */}
-            <p className="text-[#888888] text-[14px] font-medium mb-8">
-                {description ? description : (type !== "confirm" && `This window will close after ${formattedTime}`)}
-            </p>
+            {description && (
+                <p className={`text-[#888888] text-[14px] font-medium ${type === "confirm" ? "mb-8" : "mb-2"}`}>
+                    {description}
+                </p>
+            )}
+
+            {type !== "confirm" && (
+                <p className="text-[#888888] text-[14px] font-medium mb-8">
+                    This window will close after {formattedTime}
+                </p>
+            )}
 
             <div className={`flex gap-3 justify-center w-full ${onCancel ? "flex-row" : "flex-col items-center"}`}>
                 {onAction ? (
@@ -148,6 +162,6 @@ export const showCustomToast = {
                 onCancel={onCancel || (() => { })}
                 actionLabel={actionLabel}
             />
-        ), { duration: 10000, id: "jobtrack-toast" });
+        ), { duration: 5000, id: "jobtrack-toast" });
     }
 };

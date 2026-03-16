@@ -1,11 +1,14 @@
 import { setupCronJobs } from "./cron";
 
-let started = false;
+declare global {
+    var cronStarted: boolean | undefined;
+}
 
 export function initServer() {
-    if (!started) {
+    // Only run on server and only once
+    if (typeof window === 'undefined' && !global.cronStarted) {
         console.log("Starting cron jobs...");
         setupCronJobs();
-        started = true;
+        global.cronStarted = true;
     }
 }

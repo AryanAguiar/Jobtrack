@@ -101,7 +101,7 @@ const Resumes: FC<ResumesProps> = ({ id }) => {
 
                                                     <div className="inline-flex items-center self-start px-2.5 py-1 rounded-md bg-orange-500/10 border border-orange-500/20 shadow-sm">
                                                         <span className="text-xs text-gray-400 font-medium mr-1.5">ATS Score:</span>
-                                                        <span className="text-sm font-bold text-orange-400">{resume?.atsScore?.score || "N/A"}</span>
+                                                        <span className="text-sm font-bold text-orange-400">{resume.atsScore?.score ?? "N/A"}</span>
                                                     </div>
 
                                                     <div className="flex items-center text-xs text-gray-500 font-medium">
