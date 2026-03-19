@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar";
 import { Toaster } from "sonner";
 import AuthSync from "./AuthSync";
 import { useEffect, useState } from "react";
-import { HiMenuAlt2 } from "react-icons/hi";
+import MobileNav from "./MobileNav";
 
 export default function ClientLayout({
   children,
@@ -66,25 +66,27 @@ export default function ClientLayout({
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Mobile Header */}
+        {/* Mobile Header */}
         {!isAuthPage && (
-          <header className="lg:hidden flex items-center justify-between px-6 py-4 bg-[#1a1a24]/80 backdrop-blur-xl border-b border-[#2a2a3a] z-30">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-orange-gradient rounded-lg flex items-center justify-center shadow-lg shadow-orange-500/20">
-                <span className="text-white font-black text-sm">J</span>
+          <header className="lg:hidden flex items-center justify-between px-6 py-5 bg-[#0f0f14] z-30 shrink-0">
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 bg-orange-gradient rounded-full flex items-center justify-center shadow-lg shadow-orange-500/20 overflow-hidden text-white font-black text-xl border-2 border-[#1a1a24]">
+                <span className="text-white font-black text-lg">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : "J"}
+                </span>
               </div>
-              <h1 className="text-xl font-black text-white tracking-tighter">Jobtrack</h1>
+              <div className="flex flex-col">
+                <span className="text-[13px] font-bold text-gray-400">Hi there,</span>
+                <span className="text-[17px] font-black text-gray-100 tracking-tight">{user?.name || "Loading..."}</span>
+              </div>
             </div>
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="p-2 bg-white/5 border border-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
-            >
-              <HiMenuAlt2 className="text-2xl" />
-            </button>
           </header>
         )}
 
         <main className="flex-1 relative h-full overflow-y-auto custom-scrollbar">
           {children}
+          {/* Spacer to prevent mobile nav from cutting off content */}
+          {!isAuthPage && <div className="h-[100px] w-full lg:hidden shrink-0" />}
           <Toaster
             position="top-center"
             expand={false}
@@ -92,6 +94,7 @@ export default function ClientLayout({
           />
         </main>
       </div>
+      {!isAuthPage && <MobileNav />}
       <AuthSync />
     </div>
   );

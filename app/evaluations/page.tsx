@@ -9,6 +9,8 @@ import AnalyzeResumeForJob from "../components/AnalyzeResumeForJob";
 import { showCustomToast } from "../components/CustomToast";
 import Timer from "../components/Timer";
 import { useRouter } from "next/navigation";
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const sortOptions = [
     { label: "Date", value: "createdAt" },
@@ -188,23 +190,32 @@ export default function Evaluations() {
                             ))}
                         </div>
 
-                        {totalPages > 1 && (
+                        {totalPages >= 1 && (
                             <div className="mt-12 flex items-center justify-center gap-2 pb-8">
                                 <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
                                     className="px-4 py-2 border border-[#3a3a4a] rounded-xl text-sm font-bold text-gray-400 bg-[#1a1a24] hover:bg-[#22222e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Previous
+                                    <ArrowBackIosIcon />
                                 </button>
                                 <div className="flex items-center gap-1">
-                                    {[...Array(totalPages)].map((_, i) => (
-                                        <button key={i} onClick={() => setPage(i + 1)}
-                                            className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${page === i + 1 ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" : "bg-[#1a1a24] text-gray-400 border border-[#3a3a4a] hover:border-[#4a4a5a]"}`}>
-                                            {i + 1}
-                                        </button>
-                                    ))}
+                                    {[...Array(totalPages)].map((_, i) => {
+                                        const p = i + 1;
+                                        if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1)) {
+                                            return (
+                                                <button key={p} onClick={() => setPage(p)}
+                                                    className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${page === p ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" : "bg-[#1a1a24] text-gray-400 border border-[#3a3a4a] hover:border-[#4a4a5a]"}`}>
+                                                    {p}
+                                                </button>
+                                            );
+                                        }
+                                        if (p === page - 2 || p === page + 2) {
+                                            return <span key={p} className="text-gray-500 px-2">...</span>;
+                                        }
+                                        return null;
+                                    })}
                                 </div>
                                 <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
                                     className="px-4 py-2 border border-[#3a3a4a] rounded-xl text-sm font-bold text-gray-400 bg-[#1a1a24] hover:bg-[#22222e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Next
+                                    <ArrowForwardIosIcon />
                                 </button>
                             </div>
                         )}

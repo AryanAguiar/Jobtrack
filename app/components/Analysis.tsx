@@ -54,8 +54,8 @@ const Analysis: FC<AnalysisProps> = ({ id }) => {
 
     return (
         <>
-            <div className="rounded-3xl overflow-hidden bg-glass flex flex-col h-full shadow-2xl">
-                <div className="p-6 flex items-center justify-between border-b border-[#2a2a3a]/50">
+            <div className="lg:rounded-3xl overflow-hidden lg:bg-glass flex flex-col h-full lg:shadow-2xl">
+                <div className="p-4 lg:p-6 flex items-center justify-between lg:border-b border-[#2a2a3a]/50 mb-2 lg:mb-0">
                     <div className="flex items-center gap-3">
                         <div className="w-1.5 h-8 bg-orange-gradient rounded-full" />
                         <h1 className="text-xl font-bold text-white tracking-tight">Recent Analysis</h1>
@@ -73,7 +73,7 @@ const Analysis: FC<AnalysisProps> = ({ id }) => {
                         </Link>
                     </div>
                 </div>
-                <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="px-4 lg:p-6 pb-6 lg:overflow-y-auto flex-1 custom-scrollbar">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center h-full gap-4">
                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>

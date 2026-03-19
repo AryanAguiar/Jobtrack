@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -20,8 +20,43 @@ interface SidebarProps {
     onClose: () => void;
 }
 
+const menuItems = [
+    { name: "Dashboard", icon: HiOutlineHome, href: "/dashboard" },
+    { name: "Jobs", icon: HiOutlineBriefcase, href: "/jobs" },
+    { name: "Resumes", icon: HiOutlineDocumentText, href: "/resumes" },
+    { name: "Evaluations", icon: HiOutlineChartBar, href: "/evaluations" },
+];
+
 const Sidebar: FC<SidebarProps> = ({ userName, isOpen, onClose }) => {
     const pathname = usePathname();
+    const navRef = useRef<HTMLElement>(null);
+    const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0, opacity: 0 });
+
+    useEffect(() => {
+        const updateIndicator = () => {
+            const activeIndex = menuItems.findIndex(item => pathname === item.href);
+            if (activeIndex !== -1 && navRef.current) {
+                // The indicator overlay is the first child (index 0), links start at index 1
+                const activeElement = navRef.current.children[activeIndex + 1] as HTMLElement;
+                if (activeElement) {
+                    setIndicatorStyle({
+                        top: activeElement.offsetTop,
+                        height: activeElement.offsetHeight,
+                        opacity: 1
+                    });
+                }
+            } else {
+                setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
+            }
+        };
+
+        // Delay the first update slightly to ensure layout is fully computed
+        updateIndicator();
+        setTimeout(updateIndicator, 50); 
+        
+        window.addEventListener("resize", updateIndicator);
+        return () => window.removeEventListener("resize", updateIndicator);
+    }, [pathname]);
 
     async function handleLogout() {
         await fetch("/api/auth/login", {
@@ -30,13 +65,6 @@ const Sidebar: FC<SidebarProps> = ({ userName, isOpen, onClose }) => {
         localStorage.setItem("logout-event", Date.now().toString());
         window.location.href = "/login";
     }
-
-    const menuItems = [
-        { name: "Dashboard", icon: HiOutlineHome, href: "/dashboard" },
-        { name: "Jobs", icon: HiOutlineBriefcase, href: "/jobs" },
-        { name: "Resumes", icon: HiOutlineDocumentText, href: "/resumes" },
-        { name: "Evaluations", icon: HiOutlineChartBar, href: "/evaluations" },
-    ];
 
     return (
         <aside className={`
@@ -68,7 +96,17 @@ const Sidebar: FC<SidebarProps> = ({ userName, isOpen, onClose }) => {
                 </div>
             </div>
 
-            <nav className="flex-1 space-y-2">
+            <nav className="flex-1 space-y-2 relative" ref={navRef}>
+                {/* Sliding indicator */}
+                <div 
+                    className="absolute left-0 right-0 bg-orange-500/10 border border-orange-500/20 shadow-lg shadow-orange-500/5 rounded-2xl transition-all duration-300 ease-in-out pointer-events-none z-0"
+                    style={{
+                        top: `${indicatorStyle.top}px`,
+                        height: `${indicatorStyle.height}px`,
+                        opacity: indicatorStyle.opacity,
+                    }}
+                />
+
                 {menuItems.map((item) => {
                     const isActive = pathname === item.href;
                     const Icon = item.icon;
@@ -79,8 +117,8 @@ const Sidebar: FC<SidebarProps> = ({ userName, isOpen, onClose }) => {
                             onClick={() => {
                                 if (window.innerWidth < 1024) onClose();
                             }}
-                            className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${isActive
-                                ? "bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-lg shadow-orange-500/5"
+                            className={`relative z-10 flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-colors duration-300 group ${isActive
+                                ? "text-orange-400"
                                 : "text-gray-400 hover:text-gray-100 hover:bg-white/5"
                                 }`}
                         >
