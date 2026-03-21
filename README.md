@@ -1,5 +1,7 @@
 AI Resume Evaluation Platform
 
+Live Deployment: https://jobtrack-pi.vercel.app/
+
 ## Why I Built This
 I recently started working with Next.js, TypeScript, Prisma, and PostgreSQL at work, and I wanted to go beyond just using them in small tasks. I decided to build a full stack application from scratch so I could properly understand how these technologies work together in a real system.
 
